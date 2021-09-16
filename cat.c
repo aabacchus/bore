@@ -25,6 +25,11 @@ cat(int fd, char *fname) {
 
 int
 main(int argc, char **argv) {
+    if (argc > 1 && **(argv+1) == '-' && *(*(argv+1)+1) == 'u') {
+        /* ignore -u */
+        argv++;
+        argc--;
+    }
     if (argc == 1)
         return cat(0, "stdin");
 
@@ -33,7 +38,7 @@ main(int argc, char **argv) {
     char *fname;
 
     while (*++argv) {
-        if (**argv == '-') {
+        if (**argv == '-' && *(*argv + 1) == '\0') {
             fd = 0;
             fname = "stdin";
         } else {
@@ -49,7 +54,7 @@ main(int argc, char **argv) {
             err = 1;
             continue;
         }
-        if (close(fd) == -1){
+        if (fd != 0 && close(fd) == -1){
             fprintf(stderr, "cat: close %s: %s\n", fname, strerror(errno));
             err = 1;
         }
