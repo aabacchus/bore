@@ -1,6 +1,6 @@
 .POSIX:
 
-BINS = cat
+BINS = cat echo
 XCFLAGS = $(CFLAGS) -Wall -Wextra -Wpedantic -g
 
 .PHONY: clean
