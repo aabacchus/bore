@@ -11,14 +11,14 @@ cat(int fd, char *fname) {
     unsigned char buf[BUF_SIZE];
     ssize_t n;
     while ((n = read(fd, buf, BUF_SIZE)) > 0) {
-        if (n == -1){
-            fprintf(stderr, "cat: read %s: %s\n", fname, strerror(errno));
-            return 1;
-        }
         if (write(1, buf, n) == -1) {
             fprintf(stderr, "cat: write: %s\n", strerror(errno));
             return 1;
         }
+    }
+    if (n == -1){
+        fprintf(stderr, "cat: read %s: %s\n", fname, strerror(errno));
+        return 1;
     }
     return 0;
 }
