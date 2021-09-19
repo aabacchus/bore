@@ -1,0 +1,31 @@
+# This file shows the program [to be] implemented, along with the respected flags.
+# An [x] in the box indicates an essentially completed program.
+
+[x] cat [-u]
+[ ] chmod
+[ ] chown
+[ ] cp
+[ ] date
+[ ] du
+[x] echo
+[ ] head
+[ ] id
+[ ] kill
+[ ] ln
+[ ] ls
+[ ] mkdir
+[ ] more
+[ ] mv
+[ ] printf
+[ ] pwd
+[ ] rm
+[ ] rmdir
+[ ] shred
+[ ] sleep
+[ ] tail
+[x] tee [-ai]
+[ ] touch
+[ ] tty
+[ ] uname
+[ ] wc
+[ ] whoami
