@@ -8,6 +8,7 @@ BINS = \
 	true \
 
 XCFLAGS = $(CFLAGS) -Wall -Wextra -Wpedantic -g
+XLDFLAGS = $(LDFLAGS)
 
 .PHONY: clean
 
@@ -17,7 +18,7 @@ bin:
 	mkdir -p bin
 
 $(BINS:%=bin/%): $(BINS:=.c)
-	$(CC) $(XCFLAGS) -o $@ $(@:bin/%=%.c)
+	$(CC) $(XCFLAGS) $(XLDFLAGS) -o $@ $(@:bin/%=%.c)
 
 clean:
 	rm -fr bin
