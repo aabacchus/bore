@@ -5,6 +5,7 @@ BINS = \
 	echo \
 	false \
 	tee \
+	true \
 
 XCFLAGS = $(CFLAGS) -Wall -Wextra -Wpedantic -g
 

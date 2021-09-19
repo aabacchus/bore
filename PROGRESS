@@ -38,7 +38,7 @@
 [ ] time
 [ ] touch
 [ ] tr
-[ ] true
+[x] true
 [ ] tty
 [ ] uname
 [ ] uudecode
