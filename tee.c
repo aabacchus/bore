@@ -63,7 +63,7 @@ main(int argc, char **argv) {
     if (tee(fds, i) != 0) {
         err = 1;
     }
-    while (--i) {
+    while (--i > 0) {
         if (close(fds[i]) == -1){
             fprintf(stderr, "tee: close: %s\n", strerror(errno));
             err = 1;
