@@ -13,7 +13,7 @@
 [ ] dirname
 [ ] du
 [x] echo
-[ ] false
+[x] false
 [ ] find
 [ ] grep
 [ ] head
