@@ -7,7 +7,10 @@
 #include <unistd.h>
 
 enum {
-    FLAG_1 = 1 << 0
+    FLAG_1 = 1 << 0,
+    FLAG_F = 1 << 1,
+    FLAG_l = 1 << 2,
+    FLAG_p = 1 << 3,
 };
 
 struct ent {
@@ -18,6 +21,25 @@ struct ent {
 int
 printname(struct ent *e, int flags) {
     printf("%s", e->name);
+
+    char s = 0;
+    if (flags & FLAG_p)
+        if (S_ISDIR(e->mode))
+            s = '/';
+    if (flags & FLAG_F) {
+        if (S_ISSOCK(e->mode))
+            s = '=';
+        else if (S_ISDIR(e->mode))
+            s = '/';
+        else if (S_ISFIFO(e->mode))
+            s = '|';
+        else if (S_ISLNK(e->mode))
+            s = '@';
+        else if (e->mode & S_IXUSR || e->mode & S_IXGRP || e->mode & S_IXOTH)
+            s = '*';
+    }
+    if (s != 0)
+        putc(s, stdout);
 
     if (flags & FLAG_1)
         putc('\n', stdout);
@@ -70,11 +92,19 @@ main(int argc, char **argv) {
     int c, flags, ret_val;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1l")) != -1) {
+    while ((c = getopt(argc, argv, "1Flp")) != -1) {
         switch (c) {
             case '1':
-            case 'l':
                 flags |= FLAG_1;
+                break;
+            case 'F':
+                flags |= FLAG_F;
+                break;
+            case 'l':
+                flags |= FLAG_l | FLAG_1;
+                break;
+            case 'p':
+                flags |= FLAG_p;
                 break;
         }
     }
