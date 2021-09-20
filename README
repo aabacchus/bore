@@ -6,3 +6,90 @@ They probably will be POSIX.
 
 The software found in this repository has been dedicated to the public domain.
 See UNLICENSE for more details.
+
+Contributing
+------------
+
+Contributions are welcome; please send patches to me via email (or communicate
+by means of git-request-pull(1)), and make sure either the commit message or
+the file contains a public domain dedication.
+
+Programming style guide
+-----------------------
+
+This is how I tend to write C:
+
+* 4 spaces of indentation.
+
+* function type and name are separated by a linebreak:
+
+DO:    int
+       foo() {
+           ...
+       }
+NOT:   int foo() {
+           ...
+       }
+
+* C language keywords have a space between them and the bracket:
+
+DO:    if (x)
+NOT:   if(x)
+
+* function definitions and calls have no space before the bracket:
+
+DO:    foo(x);
+NOT:   foo (x);
+
+* curly braces come at the end of a line, and separated by a space:
+
+DO:    while (x) {
+           ...
+       }
+NOT:   while (x){
+           ...
+       }
+NOR:   while (x){ ... }
+
+DO:    int
+       foo() {
+           ...
+       }
+NOT:   int
+       foo(){
+           ...
+       }
+
+* one-line blocks do not require curly braces, but it's better practice to put
+  them in:
+
+OK:    if (x)
+           foo();
+BEST:  if (x) {
+           foo();
+       }
+
+* there should be spaces between elements in brackets, but not directly inside
+  the brackets. if in doubt, try to use spaces as you would under english
+  grammatical rules.
+  Just keep it consistent and tidy.
+
+DO:    for (int i; i < max; i *= 2)
+NOT:   for ( int i;i <max;   i*=2 )
+
+* the asterisk goes next to the pointer name, not the type.
+
+DO:    char *s;
+NOT:   int* x, y;
+
+* variables should be named concisely; not too short to avoid confusion or
+  obfuscation, but not too long so as to appear cluttered.
+
+* don't typedef to avoid typing the word struct.
+
+* use snake_case rather than camelCase where necessary.
+
+* try to wrap lines at about 80 columns.
+
+It shouldn't need noting that all code should be as portable as possible, using
+only POSIX features and functions.
