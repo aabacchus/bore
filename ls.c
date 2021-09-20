@@ -1,5 +1,6 @@
 #include <dirent.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -36,6 +37,7 @@ ls(const char *path, int flags) {
         /* directory */
         int n, i;
         struct dirent **dp;
+        int dfd = open(path, O_RDONLY);
         n = scandir(path, &dp, 0, alphasort);
         if (n == -1) {
             fprintf(stderr, "ls: %s: %s\n", path, strerror(errno));
@@ -43,7 +45,7 @@ ls(const char *path, int flags) {
         }
         for (i = 0; i < n; i++) {
             struct stat stt;
-            if (lstat(dp[i]->d_name, &stt) == -1) {
+            if (fstatat(dfd, dp[i]->d_name, &stt, AT_SYMLINK_NOFOLLOW) == -1) {
                 fprintf(stderr, "ls: %s: %s\n", dp[i]->d_name, strerror(errno));
                 return 1;
             }
@@ -54,6 +56,7 @@ ls(const char *path, int flags) {
 
             printname(&e, flags);
         }
+        close(dfd);
     } else {
         /* file */
         struct ent e = { .name = path, .mode = st.st_mode };
