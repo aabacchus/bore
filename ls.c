@@ -18,15 +18,16 @@ ls(const char *path, int flags) {
     }
     if (S_ISDIR(st.st_mode)) {
         /* directory */
-        DIR *dir = opendir(path);
-        if (dir == NULL) {
+        int n, i;
+        struct dirent **dp;
+        n = scandir(path, &dp, 0, alphasort);
+        if (n == -1) {
             fprintf(stderr, "ls: %s: %s\n", path, strerror(errno));
             return 1;
         }
 
-        struct dirent *dp;
-        while ((dp = readdir(dir)) != NULL) {
-            printf("%s", dp->d_name);
+        for (i = 0; i < n; i++) {
+            printf("%s", dp[i]->d_name);
 
             if (flags & FLAG_1)
                 putc('\n', stdout);
