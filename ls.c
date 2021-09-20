@@ -118,7 +118,7 @@ main(int argc, char **argv) {
     else while (*++argv)
         ret_val = ls(*argv, flags);
 
-    if (!flags & FLAG_1)
+    if (!(flags & FLAG_1))
         puts(""); /* final newline */
 
     return ret_val;
