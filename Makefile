@@ -4,6 +4,7 @@ BINS = \
 	cat \
 	echo \
 	false \
+	ls \
 	tee \
 	true \
 
