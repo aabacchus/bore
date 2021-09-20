@@ -7,7 +7,7 @@
 #define BUF_SIZE 4096
 
 int
-cat(int fd, char *fname) {
+cat(int fd, const char *fname) {
     unsigned char buf[BUF_SIZE];
     ssize_t n;
     while ((n = read(fd, buf, BUF_SIZE)) > 0) {
@@ -35,7 +35,7 @@ main(int argc, char **argv) {
 
     int fd;
     int err = 0;
-    char *fname;
+    const char *fname;
 
     while (*++argv) {
         if (**argv == '-' && *(*argv + 1) == '\0') {
