@@ -16,7 +16,7 @@ cat(int fd, char *fname) {
             return 1;
         }
     }
-    if (n == -1){
+    if (n == -1) {
         fprintf(stderr, "cat: read %s: %s\n", fname, strerror(errno));
         return 1;
     }
@@ -25,7 +25,7 @@ cat(int fd, char *fname) {
 
 int
 main(int argc, char **argv) {
-    if (argc > 1 && **(argv+1) == '-' && *(*(argv+1)+1) == 'u') {
+    if (argc > 1 && **(argv + 1) == '-' && *(*(argv + 1) + 1) == 'u') {
         /* ignore -u */
         argv++;
         argc--;
@@ -54,7 +54,7 @@ main(int argc, char **argv) {
             err = 1;
             continue;
         }
-        if (fd != 0 && close(fd) == -1){
+        if (fd != 0 && close(fd) == -1) {
             fprintf(stderr, "cat: close %s: %s\n", fname, strerror(errno));
             err = 1;
         }

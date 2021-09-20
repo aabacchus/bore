@@ -24,7 +24,7 @@ tee(int *fds, int len) {
             return 1;
         }
     }
-    if (n == -1){
+    if (n == -1) {
         fprintf(stderr, "tee: read: %s\n", strerror(errno));
         return 1;
     }
@@ -49,7 +49,7 @@ main(int argc, char **argv) {
     }
 
     argv += optind - 1;
-    int fds[argc-optind];
+    int fds[argc - optind];
     int i = 0;
 
     while (*++argv) {
@@ -64,7 +64,7 @@ main(int argc, char **argv) {
         err = 1;
     }
     while (--i > 0) {
-        if (close(fds[i]) == -1){
+        if (close(fds[i]) == -1) {
             fprintf(stderr, "tee: close: %s\n", strerror(errno));
             err = 1;
         }
