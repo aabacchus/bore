@@ -9,6 +9,22 @@ enum {
     FLAG_1 = 1 << 0
 };
 
+struct ent {
+    const char *name;
+    mode_t mode;
+};
+
+int
+printname(struct ent *e, int flags) {
+    printf("%s", e->name);
+
+    if (flags & FLAG_1)
+        putc('\n', stdout);
+    else
+        putc(' ', stdout);
+    return 0;
+}
+
 int
 ls(const char *path, int flags) {
     struct stat st;
@@ -25,22 +41,23 @@ ls(const char *path, int flags) {
             fprintf(stderr, "ls: %s: %s\n", path, strerror(errno));
             return 1;
         }
-
         for (i = 0; i < n; i++) {
-            printf("%s", dp[i]->d_name);
+            struct stat stt;
+            if (lstat(dp[i]->d_name, &stt) == -1) {
+                fprintf(stderr, "ls: %s: %s\n", dp[i]->d_name, strerror(errno));
+                return 1;
+            }
+            struct ent e = {
+                dp[i]->d_name,
+                stt.st_mode,
+            };
 
-            if (flags & FLAG_1)
-                putc('\n', stdout);
-            else
-                putc(' ', stdout);
+            printname(&e, flags);
         }
     } else {
         /* file */
-        printf("%s", path);
-        if (flags & FLAG_1)
-            putc('\n', stdout);
-        else
-            putc(' ', stdout);
+        struct ent e = { .name = path, .mode = st.st_mode };
+        printname(&e, flags);
     }
     return 0;
 }
