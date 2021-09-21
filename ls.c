@@ -9,8 +9,9 @@
 enum {
     FLAG_1 = 1 << 0,
     FLAG_F = 1 << 1,
-    FLAG_l = 1 << 2,
-    FLAG_p = 1 << 3,
+    FLAG_a = 1 << 2,
+    FLAG_l = 1 << 3,
+    FLAG_p = 1 << 4,
 };
 
 struct ent {
@@ -66,6 +67,9 @@ ls(const char *path, int flags) {
             return 1;
         }
         for (i = 0; i < n; i++) {
+            if (~flags & FLAG_a && dp[i]->d_name[0] == '.')
+                continue;
+
             struct stat stt;
             if (fstatat(dfd, dp[i]->d_name, &stt, AT_SYMLINK_NOFOLLOW) == -1) {
                 fprintf(stderr, "ls: %s: %s\n", dp[i]->d_name, strerror(errno));
@@ -92,13 +96,16 @@ main(int argc, char **argv) {
     int c, flags, ret_val;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1Flp")) != -1) {
+    while ((c = getopt(argc, argv, "1Falp")) != -1) {
         switch (c) {
             case '1':
                 flags |= FLAG_1;
                 break;
             case 'F':
                 flags |= FLAG_F;
+                break;
+            case 'a':
+                flags |= FLAG_a;
                 break;
             case 'l':
                 flags |= FLAG_l | FLAG_1;

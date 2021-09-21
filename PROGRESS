@@ -20,7 +20,7 @@
 [ ] id
 [ ] kill
 [ ] ln
-[ ] ls [-1Fp]
+[ ] ls [-1Fap]
 [ ] mkdir
 [ ] more
 [ ] mv
