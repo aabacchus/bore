@@ -123,10 +123,13 @@ main(int argc, char **argv) {
     if(!isatty(1))
         flags |= FLAG_1;
 
-    if (argc == optind)
-        ret_val = ls(".", flags);
+    if (argc == optind) {
+        if (ls(".", flags) != 0)
+            ret_val = 1;
+    }
     else while (*++argv)
-        ret_val = ls(*argv, flags);
+        if (ls(*argv, flags) != 0)
+            ret_val = 1;
 
     if (!(flags & FLAG_1))
         puts(""); /* final newline */
