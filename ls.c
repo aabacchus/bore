@@ -96,7 +96,7 @@ main(int argc, char **argv) {
     int c, flags, ret_val;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1Falp")) != -1) {
+    while ((c = getopt(argc, argv, "1Fahlp")) != -1) {
         switch (c) {
             case '1':
                 flags |= FLAG_1;
@@ -107,6 +107,9 @@ main(int argc, char **argv) {
             case 'a':
                 flags |= FLAG_a;
                 break;
+            case 'h':
+                printf("usage: %s [-1Falp]\n", argv[0]);
+                return 0;
             case 'l':
                 flags |= FLAG_l | FLAG_1;
                 break;
