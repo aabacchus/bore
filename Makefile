@@ -7,6 +7,7 @@ BINS = \
 	ls \
 	tee \
 	true \
+	wc \
 
 XCFLAGS = $(CFLAGS) -Wall -Wextra -Wpedantic -g
 XLDFLAGS = $(LDFLAGS)
