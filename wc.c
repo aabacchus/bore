@@ -29,7 +29,8 @@ print_count(struct count *ct, char *fname, int flags) {
 }
 
 
-int wc(struct count *ct, FILE *f) {
+int
+wc(struct count *ct, FILE *f) {
     int c, in_word = 0;
     while ((c = fgetc(f)) != EOF) {
 		if (c == '\n')
@@ -101,7 +102,6 @@ main(int argc, char **argv) {
         return ret_val;
 
     /* print globals */
-    //printf("%8ld%8ld%8ld", global.l, global.w, global.c);
     if (optind == argc)
         print_count(&global, NULL, flags);
     else
