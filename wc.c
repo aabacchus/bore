@@ -51,7 +51,7 @@ wc(struct count *ct, FILE *f) {
     while ((c = fgetc(f)) != EOF) {
         if (c == '\n')
             ++ct->l;
-        if (c == ' ' || c == '\t' || c == '\n')
+        if (isspace(c))
             in_word=0;
         else if (in_word == 0) {
             in_word = 1;
