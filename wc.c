@@ -93,6 +93,12 @@ main(int argc, char **argv) {
             ret_val = 1;
             continue;
         }
+
+        if (fileno(f) != 0 && fclose(f) == EOF) {
+            fprintf(stderr, "wc: %s: %s\n", *argv, strerror(errno));
+            ret_val = 1;
+        }
+
         print_count(&ct, *argv, flags);
         global.l += ct.l;
         global.w += ct.w;
