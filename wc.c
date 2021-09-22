@@ -14,6 +14,21 @@ struct count {
     long w, c, l;
 };
 
+/* function to handle which counts to print, given the flags.
+ * give the fname as NULL in order not to print a name.
+ */
+void
+print_count(struct count *ct, char *fname, int flags) {
+    if (flags == (FLAG_c | FLAG_l | FLAG_w)) {
+        /* default */
+        printf("%8ld%8ld%8ld", ct->l, ct->w, ct->c);
+    }
+    if (fname)
+        printf(" %s", fname);
+    printf("\n");
+}
+
+
 int wc(struct count *ct, FILE *f) {
     int c, in_word = 0;
     while ((c = fgetc(f)) != EOF) {
@@ -37,7 +52,8 @@ int wc(struct count *ct, FILE *f) {
 int
 main(int argc, char **argv) {
     int c, flags, ret_val;
-    flags = ret_val = 0;
+    flags = FLAG_c | FLAG_l | FLAG_w;
+    ret_val = 0;
     struct count global = { 0 };
 
     while ((c = getopt(argc, argv, "clw")) != -1) {
@@ -76,7 +92,7 @@ main(int argc, char **argv) {
             ret_val = 1;
             continue;
         }
-        printf("%8ld%8ld%8ld %s\n", ct.l, ct.w, ct.c, *argv);
+        print_count(&ct, *argv, flags);
         global.l += ct.l;
         global.w += ct.w;
         global.c += ct.c;
@@ -85,10 +101,10 @@ main(int argc, char **argv) {
         return ret_val;
 
     /* print globals */
-    printf("%8ld%8ld%8ld", global.l, global.w, global.c);
+    //printf("%8ld%8ld%8ld", global.l, global.w, global.c);
     if (optind == argc)
-        printf(" total\n");
+        print_count(&global, NULL, flags);
     else
-        printf("\n");
+        print_count(&global, "total", flags);
     return ret_val;
 }
