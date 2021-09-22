@@ -49,15 +49,15 @@ int
 wc(struct count *ct, FILE *f) {
     int c, in_word = 0;
     while ((c = fgetc(f)) != EOF) {
-		if (c == '\n')
+        if (c == '\n')
             ++ct->l;
-		if (c == ' ' || c == '\t' || c == '\n')
+        if (c == ' ' || c == '\t' || c == '\n')
             in_word=0;
-		else if (in_word == 0) {
-			in_word = 1;
-			++ct->w;
-		}
-		++ct->c;
+        else if (in_word == 0) {
+            in_word = 1;
+            ++ct->w;
+        }
+        ++ct->c;
     }
     if (ferror(f)) {
         fprintf(stderr, "wc: %s\n", strerror(errno));
