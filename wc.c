@@ -22,7 +22,23 @@ print_count(struct count *ct, char *fname, int flags) {
     if (flags == (FLAG_c | FLAG_l | FLAG_w)) {
         /* default */
         printf("%8ld%8ld%8ld", ct->l, ct->w, ct->c);
+    } else {
+        char *format_str = " %8d";
+        char *fstr = "%d";
+        if (flags & FLAG_l) {
+            printf(fstr, ct->l);
+            fstr = format_str;
+        }
+        if (flags & FLAG_w) {
+            printf(fstr, ct->w);
+            fstr = format_str;
+        }
+        if (flags & FLAG_c) {
+            printf(fstr, ct->c);
+            fstr = format_str;
+        }
     }
+
     if (fname)
         printf(" %s", fname);
     printf("\n");
@@ -53,7 +69,7 @@ wc(struct count *ct, FILE *f) {
 int
 main(int argc, char **argv) {
     int c, flags, ret_val;
-    flags = FLAG_c | FLAG_l | FLAG_w;
+    flags = 0;
     ret_val = 0;
     struct count global = { 0 };
 
@@ -68,9 +84,15 @@ main(int argc, char **argv) {
             case 'w':
                 flags |= FLAG_w;
                 break;
-            break;
+            default:
+                flags = FLAG_c | FLAG_l | FLAG_w;
+                break;
         }
     }
+    /* if no options given */
+    if (optind == 1)
+        flags = FLAG_c | FLAG_l | FLAG_w;
+
     argv += optind - 1;
 
     if (optind == argc) {

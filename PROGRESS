@@ -24,6 +24,7 @@
 [ ] mkdir
 [ ] more
 [ ] mv
+[ ] nl
 [ ] printf
 [ ] ps
 [ ] pwd
@@ -43,5 +44,5 @@
 [ ] uname
 [ ] uudecode
 [ ] uuencode
-[ ] wc
+[ ] wc [-lwc]
 [ ] who
