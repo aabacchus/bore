@@ -2,6 +2,7 @@
 
 int
 main(int argc, char **argv) {
+    (void)argc;
     argv++;
     while (*argv) {
         printf("%s", *argv);
