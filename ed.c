@@ -35,8 +35,10 @@ print_byte_counts(size_t n) {
 struct line *
 find_line(int num) {
     struct line *l;
-    if (num < 1 || num > num_lines + 1)
+    if (num < 1 || num > num_lines + 1) {
+        fprintf(stderr, "bad line number\n");
         return NULL;
+    }
     l = first;
     while (num--)
         l = l->next;
@@ -47,12 +49,15 @@ find_line(int num) {
 struct line *
 insert_line_before(char *s, int len, int num) {
     struct line *old, *new;
+    old = find_line(num);
+    if (old == NULL)
+        return NULL;
+
     new = malloc(sizeof *new);
     if (new == NULL) {
         fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
         return NULL;
     }
-    old = find_line(num);
 
     new->s = malloc(len + 1);
     if (new->s == NULL) {
@@ -81,14 +86,15 @@ read_buf(char *path) {
     fd = open(path, O_RDONLY);
     if (fd == -1) {
         fprintf(stderr, "ed: %s: %s\n", path, strerror(errno));
-        return -1;
+        return 1;
     }
     do {
         char *eol = memchr(buf, '\n', buf_used);
         if (eol) {
             lineno++;
             int offset = eol - buf + 1;
-            insert_line_before(buf, offset, lineno);
+            if (!insert_line_before(buf, offset, lineno))
+                return 1;
             cur_line = 1;
             buf += offset;
             buf_used -= offset;
@@ -98,6 +104,10 @@ read_buf(char *path) {
         if (buf_used >= buf_size) {
             int size_new = buf_size * 3 / 2;
             char *b_new = realloc(buf_start, size_new);
+            if (b_new == NULL) {
+                fprintf(stderr, "ed: realloc: %s\n", strerror(errno));
+                return 1;
+            }
             buf_start = b_new;
             buf = buf_start + buf_used;
             buf_size = size_new;
@@ -107,9 +117,12 @@ read_buf(char *path) {
     } while (n > 0);
     if (n == -1) {
         fprintf(stderr, "ed: %s: %s\n", path, strerror(errno));
-        return -1;
+        return 1;
     }
-    close(fd);
+    if (close(fd) == -1) {
+        fprintf(stderr, "ed: %s: %s\n", path, strerror(errno));
+        return 1;
+    }
     print_byte_counts(bytes);
     return 0;
 }
@@ -122,47 +135,55 @@ write_buf(char *path) {
     fd = open(path, O_WRONLY);
     if (fd == -1) {
         fprintf(stderr, "ed: %s: %s\n", path, strerror(errno));
-        return -1;
+        return 1;
     }
     struct line *l = first->next;
     for (; l != first; l = l->next) {
         n = write(fd, l->s, l->len);
         if (n == -1) {
             fprintf(stderr, "ed: %s: %s\n", path, strerror(errno));
-            return -1;
+            return 1;
         }
         total += n;
     }
     printf("%ld\n", total);
-    close(fd);
+    if (close(fd) == -1) {
+        fprintf(stderr, "ed: %s: %s\n", path, strerror(errno));
+        return 1;
+    }
     return 0;
 }
 
 
-void
+int
 input(int lineno) {
     ssize_t n;
     char *tmp = malloc(BUFSIZ);
     if (tmp == NULL) {
         fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
-        return;
+        return -1;
     }
     size_t len = BUFSIZ;
     while (1) {
         n = getline(&tmp, &len, stdin);
         /* getline returns bytes + 1 for \n delimiter */
         if (n == 0)
-            return;
+            break;
         if (n < 0) {
             fprintf(stderr, "ed: %s\n", strerror(errno));
-            return;
+            goto input_fail;
         }
         if (tmp[0] == '.' && tmp[1] == '\n' && tmp[2] == '\0')
-            return;
-        insert_line_before(tmp, n, lineno);
+            break;
+        if (!insert_line_before(tmp, n, lineno))
+            goto input_fail;
         lineno++; /* to write following lines afterwards */
     }
     free(tmp);
+    return 0;
+input_fail:
+    free(tmp);
+    return 1;
 }
 
 int
@@ -171,17 +192,23 @@ ed(char *startfile) {
         if (read_buf(startfile) != 0)
             return 1;
     while (1) {
-
-        if (prompt)
+        if (prompt) {
             printf("%c ", prompt);
-        fflush(stdout);
+            if (fflush(stdout) == EOF) {
+                fprintf(stderr, "ed: fflush: %s\n", strerror(errno));
+                return 1;
+            }
+        }
         char *c = malloc(BUFSIZ);
         if (c == NULL) {
             fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
             return 1;
         }
         size_t c_len = BUFSIZ;
-        getline(&c, &c_len, stdin);
+        if (getline(&c, &c_len, stdin) == -1) {
+            fprintf(stderr, "ed: getline: %s\n", strerror(errno));
+            return 1;
+        }
         if (isdigit(*c)) {
             char new_c = *c - '0';
             if (new_c <= num_lines)
@@ -207,18 +234,21 @@ ed(char *startfile) {
                     cur_line = num_lines;
                 break;
             case 'i':
-                input(cur_line);
+                if (input(cur_line) != 0)
+                    continue;
                 break;
             case 'a':
-                input(cur_line+1);
+                if (input(cur_line+1) != 0)
+                    continue;
                 break;
             case 'p':
                 printf("%s", find_line(cur_line)->s);
                 break;
             case 'w':
-                if (startfile)
-                    write_buf(startfile);
-                else
+                if (startfile) {
+                    if (write_buf(startfile) != 0)
+                        continue;
+                } else
                     printf("? writing to a new filename not yet implemented\n");
                 break;
             case 'q':
@@ -242,9 +272,10 @@ usage_quit(char *argv0) {
 
 int
 main(int argc, char **argv) {
+    int c, ret;
     s_flag = 0;
     prompt = 0;
-    int c;
+    ret = 0;
 
     buf_start = malloc(buf_size);
     if (buf_start == NULL) {
@@ -255,6 +286,7 @@ main(int argc, char **argv) {
     first = malloc(sizeof(*first));
     if (first == NULL) {
         fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
+        free(buf_start);
         return 1;
     }
     first->next = first;
@@ -281,7 +313,7 @@ main(int argc, char **argv) {
     if (*argv)
         startfile = *argv;
 
-    ed(startfile);
+    ret = ed(startfile);
     free(buf_start);
     struct line *x = first;
     while (x != first) {
@@ -289,5 +321,5 @@ main(int argc, char **argv) {
         free(x);
     }
     free(first);
-    return 0;
+    return ret;
 }
