@@ -105,19 +105,23 @@ read_buf(char *path) {
 int
 write_buf(char *path) {
     int fd;
-    ssize_t n;
+    ssize_t n, total = 0;
 
     fd = open(path, O_WRONLY);
     if (fd == -1) {
         fprintf(stderr, "ed: %s: %s\n", path, strerror(errno));
         return -1;
     }
-    n = write(fd, buf_start, buf_used);
-    if (n == -1) {
-        fprintf(stderr, "ed: %s: %s\n", path, strerror(errno));
-        return -1;
+    struct line *l = first->next;
+    for (; l != first; l = l->next) {
+        n = write(fd, l->s, l->len);
+        if (n == -1) {
+            fprintf(stderr, "ed: %s: %s\n", path, strerror(errno));
+            return -1;
+        }
+        total += n;
     }
-    printf("%ld\n", n);
+    printf("%ld\n", total);
     close(fd);
     return 0;
 }
@@ -139,11 +143,8 @@ input(int lineno) {
         }
         if (tmp[0] == '.' && tmp[1] == '\n' && tmp[2] == '\0')
             return;
+        fprintf(stderr, "got %ld bytes: '%s'\n", n, tmp);
         insert_line_before(tmp, n, lineno);
-        /*memcpy(buf, tmp, n);
-        buf += n;
-        buf_used += n;
-        */
     }
     free(tmp);
 }
@@ -158,10 +159,13 @@ ed(char *startfile) {
         if (prompt)
             printf("%c ", prompt);
         fflush(stdout);
-        int c = fgetc(stdin);
-        if (isdigit(c))
-            cur_line = c - '0';
-        else switch (c) {
+        char c[BUFSIZ];
+        size_t c_len = BUFSIZ;
+        getline(&c, &c_len, stdin);
+        fprintf(stderr, "gotline: '%s'\n", c);
+        if (isdigit(*c))
+            cur_line = *c - '0';
+        else switch (*c) {
             case '=':
                 printf("%d\n", cur_line);
                 break;
@@ -176,16 +180,13 @@ ed(char *startfile) {
                     cur_line = num_lines;
                 break;
             case 'i':
-                buf = buf_start;
                 input(cur_line);
                 break;
             case 'a':
-                buf += buf_used;
                 input(cur_line+1);
                 break;
             case 'p':
                 printf("%s", find_line(cur_line)->s);
-                //printf("%s", buf_start);
                 break;
             case 'w':
                 if (startfile)
