@@ -146,7 +146,7 @@ write_buf(char *path) {
         }
         total += n;
     }
-    printf("%ld\n", total);
+    print_byte_counts(total);
     if (close(fd) == -1) {
         fprintf(stderr, "ed: %s: %s\n", path, strerror(errno));
         return 1;
