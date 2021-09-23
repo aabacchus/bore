@@ -3,6 +3,7 @@
 BINS = \
 	cat \
 	echo \
+	ed \
 	false \
 	ls \
 	tee \
