@@ -187,6 +187,17 @@ input_fail:
 }
 
 int
+delete_line(int lineno) {
+    struct line *l = find_line(lineno);
+    if (l == NULL)
+        return 1;
+    l->prev->next = l->next;
+    l->next->prev = l->prev;
+    free(l);
+    return 0;
+}
+
+int
 ed(char *startfile) {
     if (startfile) 
         if (read_buf(startfile) != 0)
@@ -235,15 +246,25 @@ ed(char *startfile) {
                     cur_line = num_lines;
                 break;
             case 'i':
-                if (input(cur_line) != 0)
+                if (input(cur_line) != 0) {
+                    printf("?\n");
                     continue;
+                }
                 break;
             case 'a':
-                if (input(cur_line+1) != 0)
+                if (input(cur_line+1) != 0) {
+                    printf("?\n");
                     continue;
+                }
                 break;
             case 'p':
                 printf("%s", find_line(cur_line)->s);
+                break;
+            case 'd':
+                if (delete_line(cur_line) != 0) {
+                    printf("?\n");
+                    continue;
+                }
                 break;
             case 'w':
                 if (startfile) {
