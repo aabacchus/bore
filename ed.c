@@ -284,9 +284,10 @@ main(int argc, char **argv) {
     ed(startfile);
     free(buf_start);
     struct line *x = first;
-    while (x) {
+    while (x != first) {
         x = x->next;
         free(x);
     }
+    free(first);
     return 0;
 }
