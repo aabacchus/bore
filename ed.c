@@ -24,7 +24,7 @@ struct line {
 
 struct line *first;
 int num_lines = 0;
-int cur_line = 0;
+int cur_line = 1;
 
 void
 print_byte_counts(size_t n) {
