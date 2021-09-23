@@ -151,8 +151,8 @@ input(int lineno) {
         }
         if (tmp[0] == '.' && tmp[1] == '\n' && tmp[2] == '\0')
             return;
-        fprintf(stderr, "got %ld bytes: '%s'\n", n, tmp);
         insert_line_before(tmp, n, lineno);
+        lineno++; /* to write following lines afterwards */
     }
     free(tmp);
 }
