@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -56,6 +57,7 @@ insert_line_before(char *s, int len, int num) {
     new->prev->next = new;
     old->prev = new;
     num_lines++;
+    cur_line = num;
     return new;
 }
 
@@ -138,6 +140,7 @@ input(int lineno) {
         buf_used += n;
         */
     }
+    free(tmp);
 }
 
 int
@@ -151,15 +154,21 @@ ed(char *startfile) {
             printf("%c ", prompt);
         fflush(stdout);
         int c = fgetc(stdin);
-        switch (c) {
+        if (isdigit(c))
+            cur_line = c - '0';
+        else switch (c) {
             case '=':
                 printf("%d\n", cur_line);
                 break;
             case '+':
                 cur_line++;
+                if (cur_line > num_lines)
+                    cur_line = 1;
                 break;
             case '-':
                 cur_line--;
+                if (cur_line <= 0)
+                    cur_line = num_lines;
                 break;
             case 'i':
                 buf = buf_start;
@@ -170,7 +179,9 @@ ed(char *startfile) {
                 input(cur_line+1);
                 break;
             case 'p':
-                printf("%s", find_line(cur_line)->s);
+                fprintf(stderr, "cur line is %d\n", cur_line);
+                fprintf(stderr, "max line is %d\n", num_lines);
+                printf("%s\n", find_line(cur_line)->s);
                 //printf("%s", buf_start);
                 break;
             case 'w':
@@ -231,5 +242,11 @@ main(int argc, char **argv) {
         startfile = *argv;
 
     ed(startfile);
+    free(buf_start);
+    struct line *x = first;
+    while (x) {
+        x = x->next;
+        free(x);
+    }
     return 0;
 }
