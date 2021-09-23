@@ -15,15 +15,53 @@ char *buf, *buf_start;
 int buf_size = BUFSIZ;
 int buf_used = 0;
 
+struct line {
+    char s[1];
+    int len;
+    struct line *prev, *next;
+};
+
+struct line *first;
+int num_lines = 0;
+int cur_line = 0;
+
 void
 print_byte_counts(size_t n) {
     if (!s_flag)
         printf("%zu\n", n);
 }
 
+struct line *
+find_line(int num) {
+    struct line *l;
+    if (num < 1 || num > num_lines + 1)
+        return NULL;
+    l = first;
+    while (num--)
+        l = l->next;
+    return l;
+}
+
+/* make a new line before the numth line */
+struct line *
+insert_line_before(char *s, int len, int num) {
+    struct line *old, *new;
+    new = malloc(sizeof(struct line) + len);
+    old = find_line(num);
+
+    memcpy(new->s, s, len);
+    new->len = len;
+    new->prev = old->prev;
+    new->next = old;
+    new->prev->next = new;
+    old->prev = new;
+    num_lines++;
+    return new;
+}
+
 int
 read_buf(char *path) {
-    int fd;
+    int fd, lineno = 0;
     ssize_t n = 0;
 
     fd = open(path, O_RDONLY);
@@ -32,6 +70,12 @@ read_buf(char *path) {
         return -1;
     }
     do {
+        char *eol = memchr(buf, '\n', buf_used);
+        if (eol) {
+            lineno++;
+            insert_line_before(buf, eol - buf, lineno);
+            cur_line = 1;
+        }
         if (buf_used >= buf_size) {
             int size_new = buf_size * 3 / 2;
             char *b_new = realloc(buf_start, size_new);
@@ -72,9 +116,8 @@ write_buf(char *path) {
 }
 
 
-/* set buf appropriately so that input() reads into the right bit. */
 void
-input(void) {
+input(int lineno) {
     ssize_t n;
     char *tmp = malloc(BUFSIZ);
     size_t len = BUFSIZ;
@@ -89,9 +132,11 @@ input(void) {
         }
         if (tmp[0] == '.' && tmp[1] == '\n' && tmp[2] == '\0')
             return;
-        memcpy(buf, tmp, n);
+        insert_line_before(tmp, n, lineno);
+        /*memcpy(buf, tmp, n);
         buf += n;
         buf_used += n;
+        */
     }
 }
 
@@ -107,16 +152,26 @@ ed(char *startfile) {
         fflush(stdout);
         int c = fgetc(stdin);
         switch (c) {
+            case '=':
+                printf("%d\n", cur_line);
+                break;
+            case '+':
+                cur_line++;
+                break;
+            case '-':
+                cur_line--;
+                break;
             case 'i':
                 buf = buf_start;
-                input();
+                input(cur_line);
                 break;
             case 'a':
                 buf += buf_used;
-                input();
+                input(cur_line+1);
                 break;
             case 'p':
-                printf("%s", buf_start);
+                printf("%s", find_line(cur_line)->s);
+                //printf("%s", buf_start);
                 break;
             case 'w':
                 if (startfile)
@@ -150,6 +205,9 @@ main(int argc, char **argv) {
 
     buf_start = malloc(buf_size);
     buf = buf_start;
+    first = malloc(sizeof(first));
+    first->next = first;
+    first->prev = first;
     while ((c = getopt(argc, argv, "p:s")) != EOF) {
         switch (c) {
             case 's':
