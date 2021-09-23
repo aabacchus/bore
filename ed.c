@@ -63,7 +63,7 @@ insert_line_before(char *s, int len, int num) {
 
 int
 read_buf(char *path) {
-    int fd, lineno = 0;
+    int fd, bytes = 0, lineno = 0;
     ssize_t n = 0;
 
     fd = open(path, O_RDONLY);
@@ -75,8 +75,13 @@ read_buf(char *path) {
         char *eol = memchr(buf, '\n', buf_used);
         if (eol) {
             lineno++;
-            insert_line_before(buf, eol - buf, lineno);
+            int offset = eol - buf + 1;
+            insert_line_before(buf, offset, lineno);
             cur_line = 1;
+            buf += offset;
+            buf_used -= offset;
+            bytes += offset;
+            continue;
         }
         if (buf_used >= buf_size) {
             int size_new = buf_size * 3 / 2;
@@ -93,7 +98,7 @@ read_buf(char *path) {
         return -1;
     }
     close(fd);
-    print_byte_counts(buf_used);
+    print_byte_counts(bytes);
     return 0;
 }
 
@@ -179,9 +184,7 @@ ed(char *startfile) {
                 input(cur_line+1);
                 break;
             case 'p':
-                fprintf(stderr, "cur line is %d\n", cur_line);
-                fprintf(stderr, "max line is %d\n", num_lines);
-                printf("%s\n", find_line(cur_line)->s);
+                printf("%s", find_line(cur_line)->s);
                 //printf("%s", buf_start);
                 break;
             case 'w':
