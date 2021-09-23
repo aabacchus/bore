@@ -266,6 +266,17 @@ ed(char *startfile) {
                     continue;
                 }
                 break;
+            case 'c':
+                /* delete then insert */
+                if (delete_line(cur_line) != 0) {
+                    printf("?\n");
+                    continue;
+                }
+                if (input(cur_line) != 0) {
+                    printf("?\n");
+                    continue;
+                }
+                break;
             case 'w':
                 if (startfile) {
                     if (write_buf(startfile) != 0)
