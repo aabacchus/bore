@@ -209,6 +209,7 @@ ed(char *startfile) {
             fprintf(stderr, "ed: getline: %s\n", strerror(errno));
             return 1;
         }
+        char *c_initial = c;
         if (isdigit(*c)) {
             char new_c = *c - '0';
             if (new_c <= num_lines)
@@ -217,9 +218,9 @@ ed(char *startfile) {
                 printf("?\n");
                 continue;
             }
-//            c++;
+            c++;
         }
-        else switch (*c) {
+        switch (*c) {
             case '=':
                 printf("%d\n", cur_line);
                 break;
@@ -259,7 +260,7 @@ ed(char *startfile) {
                 printf("?\n");
                 break;
         }
-        free(c);
+        free(c_initial);
     }
     return 0;
 }
