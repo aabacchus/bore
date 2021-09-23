@@ -48,6 +48,10 @@ struct line *
 insert_line_before(char *s, int len, int num) {
     struct line *old, *new;
     new = malloc(sizeof(struct line) + len);
+    if (new == NULL) {
+        fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
+        return NULL;
+    }
     old = find_line(num);
 
     memcpy(new->s, s, len);
@@ -131,6 +135,10 @@ void
 input(int lineno) {
     ssize_t n;
     char *tmp = malloc(BUFSIZ);
+    if (tmp == NULL) {
+        fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
+        return;
+    }
     size_t len = BUFSIZ;
     while (1) {
         n = getline(&tmp, &len, stdin);
@@ -159,12 +167,23 @@ ed(char *startfile) {
         if (prompt)
             printf("%c ", prompt);
         fflush(stdout);
-        char c[BUFSIZ];
+        char *c = malloc(BUFSIZ);
+        if (c == NULL) {
+            fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
+            return 1;
+        }
         size_t c_len = BUFSIZ;
         getline(&c, &c_len, stdin);
-        fprintf(stderr, "gotline: '%s'\n", c);
-        if (isdigit(*c))
-            cur_line = *c - '0';
+        if (isdigit(*c)) {
+            char new_c = *c - '0';
+            if (new_c <= num_lines)
+                cur_line = new_c;
+            else {
+                printf("?\n");
+                continue;
+            }
+//            c++;
+        }
         else switch (*c) {
             case '=':
                 printf("%d\n", cur_line);
@@ -202,6 +221,7 @@ ed(char *startfile) {
                 printf("?\n");
                 break;
         }
+        free(c);
     }
     return 0;
 }
@@ -219,8 +239,16 @@ main(int argc, char **argv) {
     int c;
 
     buf_start = malloc(buf_size);
+    if (buf_start == NULL) {
+        fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
+        return 1;
+    }
     buf = buf_start;
     first = malloc(sizeof(first));
+    if (first == NULL) {
+        fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
+        return 1;
+    }
     first->next = first;
     first->prev = first;
     while ((c = getopt(argc, argv, "p:s")) != EOF) {
