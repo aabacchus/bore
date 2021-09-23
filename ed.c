@@ -17,9 +17,9 @@ int buf_size = BUFSIZ;
 int buf_used = 0;
 
 struct line {
-    char s[1];
     int len;
     struct line *prev, *next;
+    char *s;
 };
 
 struct line *first;
@@ -47,14 +47,22 @@ find_line(int num) {
 struct line *
 insert_line_before(char *s, int len, int num) {
     struct line *old, *new;
-    new = malloc(sizeof(struct line) + len);
+    new = malloc(sizeof *new);
     if (new == NULL) {
         fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
         return NULL;
     }
     old = find_line(num);
 
+    new->s = malloc(len + 1);
+    if (new->s == NULL) {
+        free(new);
+        fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
+        return NULL;
+    }
     memcpy(new->s, s, len);
+    new->s[len] = '\0';
+
     new->len = len;
     new->prev = old->prev;
     new->next = old;
@@ -244,7 +252,7 @@ main(int argc, char **argv) {
         return 1;
     }
     buf = buf_start;
-    first = malloc(sizeof(first));
+    first = malloc(sizeof(*first));
     if (first == NULL) {
         fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
         return 1;
