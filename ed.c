@@ -199,6 +199,7 @@ delete_line(int lineno) {
 
 int
 ed(char *startfile) {
+    int changed = 0;
     if (startfile) 
         if (read_buf(startfile) != 0)
             return 1;
@@ -250,12 +251,14 @@ ed(char *startfile) {
                     printf("?\n");
                     continue;
                 }
+                changed = 1;
                 break;
             case 'a':
                 if (input(cur_line+1) != 0) {
                     printf("?\n");
                     continue;
                 }
+                changed = 1;
                 break;
             case 'p':
                 printf("%s", find_line(cur_line)->s);
@@ -265,6 +268,7 @@ ed(char *startfile) {
                     printf("?\n");
                     continue;
                 }
+                changed = 1;
                 break;
             case 'c':
                 /* delete then insert */
@@ -272,6 +276,7 @@ ed(char *startfile) {
                     printf("?\n");
                     continue;
                 }
+                changed = 1;
                 if (input(cur_line) != 0) {
                     printf("?\n");
                     continue;
@@ -285,6 +290,11 @@ ed(char *startfile) {
                     printf("? writing to a new filename not yet implemented\n");
                 break;
             case 'q':
+                if (changed == 0)
+                    return 0;
+                printf("?\n");
+                break;
+            case 'Q':
                 return 0;
             case '\n':
                 break;

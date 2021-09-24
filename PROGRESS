@@ -14,7 +14,7 @@
 [ ] dirname
 [ ] du
 [x] echo
-[ ] ed [-ps] p i a
+[ ] ed [-ps] p i a q Q
 [x] false
 [ ] find
 [ ] grep
