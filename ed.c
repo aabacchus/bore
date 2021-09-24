@@ -286,6 +286,7 @@ ed(char *startfile) {
                 if (startfile) {
                     if (write_buf(startfile) != 0)
                         continue;
+                    changed = 0;
                 } else
                     printf("? writing to a new filename not yet implemented\n");
                 break;
