@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -83,6 +84,7 @@ ls(const char *path, int flags) {
             printname(&e, flags);
         }
         close(dfd);
+        free(dp);
     } else {
         /* file */
         struct ent e = { .name = path, .mode = st.st_mode };
