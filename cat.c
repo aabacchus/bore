@@ -4,22 +4,20 @@
 #include <string.h>
 #include <unistd.h>
 
-#define BUF_SIZE 4096
-
 int
-cat(int fd, const char *fname) {
-    unsigned char buf[BUF_SIZE];
-    ssize_t n;
-    while ((n = read(fd, buf, BUF_SIZE)) > 0) {
-        if (write(1, buf, n) == -1) {
-            fprintf(stderr, "cat: write: %s\n", strerror(errno));
-            return 1;
-        }
+cat(FILE *fp, const char *fname) {
+    int c = -1;
+
+    while ((c = fgetc(fp)) != EOF) {
+        putchar(c);
     }
-    if (n == -1) {
-        fprintf(stderr, "cat: read %s: %s\n", fname, strerror(errno));
+
+    /* Check whether the EOF came from an end-of-file or an error. */
+    if ((ferror(fp))) {
+        fprintf(stderr, "cat: fgetc %s: %s\n", fname, strerror(errno));
         return 1;
     }
+
     return 0;
 }
 
@@ -30,34 +28,38 @@ main(int argc, char **argv) {
         argv++;
         argc--;
     }
-    if (argc == 1)
-        return cat(0, "stdin");
 
-    int fd;
+    if (argc == 1) {
+        return cat(stdin, "stdin");
+    }
+
     int err = 0;
-    const char *fname;
+    const char *fname = NULL;
+    FILE *fp = NULL;
 
     while (*++argv) {
         if (**argv == '-' && *(*argv + 1) == '\0') {
-            fd = 0;
+            fp = stdin;
             fname = "stdin";
         } else {
-            fd = open(*argv, O_RDONLY);
-            if (fd == -1) {
-                fprintf(stderr, "cat: open %s: %s\n", *argv, strerror(errno));
+            fp = fopen(*argv, "r");
+            if (!fp) {
+                fprintf(stderr, "cat: fopen %s: %s\n", *argv, strerror(errno));
                 err = 1;
                 continue;
             }
             fname = *argv;
         }
-        if (cat(fd, fname) != 0) {
+
+        if ((cat(fp, fname)) == 1) {
             err = 1;
-            continue;
         }
-        if (fd != 0 && close(fd) == -1) {
-            fprintf(stderr, "cat: close %s: %s\n", fname, strerror(errno));
+
+        if (fp != stdin && (fclose(fp)) == EOF) {
+            fprintf(stderr, "cat: fclose %s: %s\n", fname, strerror(errno));
             err = 1;
         }
     }
+
     return err;
 }
