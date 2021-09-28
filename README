@@ -69,6 +69,17 @@ BEST:  if (x) {
            foo();
        }
 
+* assignment should not take place inside an if block or similar, unless it is
+  particularly useful such as in an while block. Use a separate line.
+
+DO:    fd = open("path", O_RDONLY);
+       if (fd == -1) {
+           ...
+NOT:   if ((fd = open("path", O_RDONLY)) == -1) {
+           ...
+OK:    while ((n = read(fd, buf, BUFSIZ) > 0) {
+           ...
+
 * there should be spaces between elements in brackets, but not directly inside
   the brackets. if in doubt, try to use spaces as you would under english
   grammatical rules.
