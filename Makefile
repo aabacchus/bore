@@ -6,6 +6,7 @@ BINS = \
 	ed \
 	false \
 	ls \
+	mkdir \
 	tee \
 	true \
 	wc \
