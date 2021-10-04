@@ -1,14 +1,11 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-#ifndef BUFSIZ
-#define BUFSIZ 4096
-#endif
 
 int s_flag;
 char prompt;
@@ -84,14 +81,14 @@ read_buf(char *path) {
     }
 
     int c, linelen, lineno;
-    char buf[BUFSIZ] = {0};
+    char buf[LINE_MAX] = {0};
     char *bp = buf;
     linelen = 0;
     lineno = 1;
     size_t bytes = 0;
     while ((c = fgetc(fds)) != EOF) {
         linelen++;
-        if (linelen > BUFSIZ) {
+        if (linelen > LINE_MAX) {
             fprintf(stderr, "ed: %s line %d: maximum line length exceeded\n", path, lineno);
             return 1;
         }
@@ -150,12 +147,12 @@ write_buf(char *path) {
 int
 input(int lineno) {
     ssize_t n;
-    char *tmp = malloc(BUFSIZ);
+    char *tmp = malloc(LINE_MAX);
     if (tmp == NULL) {
         fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
         return -1;
     }
-    size_t len = BUFSIZ;
+    size_t len = LINE_MAX;
     while (1) {
         n = getline(&tmp, &len, stdin);
         /* getline returns bytes + 1 for \n delimiter */
@@ -203,12 +200,12 @@ ed(char *startfile) {
                 return 1;
             }
         }
-        char *c = malloc(BUFSIZ);
+        char *c = malloc(LINE_MAX);
         if (c == NULL) {
             fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
             return 1;
         }
-        size_t c_len = BUFSIZ;
+        size_t c_len = LINE_MAX;
         if (getline(&c, &c_len, stdin) == -1) {
             fprintf(stderr, "ed: getline: %s\n", strerror(errno));
             return 1;
