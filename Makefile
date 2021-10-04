@@ -5,6 +5,7 @@ BINS = \
 	echo \
 	ed \
 	false \
+	head \
 	ls \
 	mkdir \
 	tee \
