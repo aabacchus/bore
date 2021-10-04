@@ -35,6 +35,7 @@
 [ ] shred
 [ ] sleep
 [ ] sort
+[ ] split
 [ ] strings
 [ ] tail
 [x] tee [-ai]
