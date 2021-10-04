@@ -9,13 +9,15 @@ int
 head(FILE *f, int n) {
     int i;
     size_t len = LINE_MAX;
+    ssize_t bytes;
     char *buf = malloc(len);
     if (buf == NULL) {
         fprintf(stderr, "head: %s\n", strerror(errno));
         return 1;
     }
     for (i = 0; i < n; i++) {
-        if (getline(&buf, &len, f) == -1) {
+        bytes = getline(&buf, &len, f);
+        if (bytes == -1) {
             if (ferror(f)) {
                 fprintf(stderr, "head: %s\n", strerror(errno));
                 return 1;
@@ -23,7 +25,10 @@ head(FILE *f, int n) {
             if (feof(f))
                 break;
         }
-        printf(buf);
+        if (write(1, buf, bytes) == -1) {
+            fprintf(stderr, "head: %s\n", strerror(errno));
+            return 1;
+        }
     }
 
     return 0;
