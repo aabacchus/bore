@@ -43,7 +43,7 @@
 [ ] touch
 [ ] tr
 [x] true
-[ ] tty
+[x] tty
 [ ] uname
 [ ] uudecode
 [ ] uuencode

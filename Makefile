@@ -10,6 +10,7 @@ BINS = \
 	mkdir \
 	tee \
 	true \
+	tty \
 	wc \
 
 CC = cc
