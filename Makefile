@@ -8,6 +8,7 @@ BINS = \
 	head \
 	ls \
 	mkdir \
+	sort \
 	tee \
 	true \
 	tty \

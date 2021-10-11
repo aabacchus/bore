@@ -34,7 +34,7 @@
 [ ] rmdir
 [ ] shred
 [ ] sleep
-[ ] sort
+[ ] sort [-r]
 [ ] split
 [ ] strings
 [ ] tail
