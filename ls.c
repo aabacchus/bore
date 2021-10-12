@@ -71,6 +71,7 @@ printname(struct ent *e, int flags) {
         /* file mode */
         pretty_print_perms(e->mode);
         /* number of links */
+        printf("%lu ", e->nlink);
         /* owner name */
         /* group name */
         /* size (or device info for character/block special files) */
