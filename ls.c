@@ -12,17 +12,22 @@ enum {
     FLAG_A = 1 << 1,
     FLAG_F = 1 << 2,
     FLAG_a = 1 << 3,
-    FLAG_l = 1 << 4,
-    FLAG_p = 1 << 5,
+    FLAG_i = 1 << 4,
+    FLAG_l = 1 << 5,
+    FLAG_p = 1 << 6,
 };
 
 struct ent {
     const char *name;
+    ino_t ino;
     mode_t mode;
 };
 
 int
 printname(struct ent *e, int flags) {
+    if (flags & FLAG_i)
+        printf("%lu ", e->ino);
+
     printf("%s", e->name);
 
     char s = 0;
@@ -85,6 +90,7 @@ ls(const char *path, int flags) {
             }
             struct ent e = {
                 dp[i]->d_name,
+                stt.st_ino,
                 stt.st_mode,
             };
 
@@ -105,7 +111,7 @@ main(int argc, char **argv) {
     int c, flags, ret_val;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1AFahlp")) != -1) {
+    while ((c = getopt(argc, argv, "1AFahilp")) != -1) {
         switch (c) {
             case '1':
                 flags |= FLAG_1;
@@ -120,8 +126,11 @@ main(int argc, char **argv) {
                 flags |= FLAG_a;
                 break;
             case 'h':
-                printf("usage: %s [-1AFalp]\n", argv[0]);
+                printf("usage: %s [-1AFailp]\n", argv[0]);
                 return 0;
+            case 'i':
+                flags |= FLAG_i;
+                break;
             case 'l':
                 flags |= FLAG_l | FLAG_1;
                 break;
