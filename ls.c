@@ -22,10 +22,11 @@ enum {
     FLAG_i = 1 << 6,
     FLAG_l = 1 << 7,
     FLAG_m = 1 << 8,
-    FLAG_o = 1 << 9,
-    FLAG_p = 1 << 10,
-    FLAG_u = 1 << 11,
-    FLAG_q = 1 << 12,
+    FLAG_n = 1 << 9,
+    FLAG_o = 1 << 10,
+    FLAG_p = 1 << 11,
+    FLAG_u = 1 << 12,
+    FLAG_q = 1 << 13,
 };
 
 struct ent {
@@ -101,7 +102,7 @@ printname(struct ent *e, uint32_t flags) {
         if (~flags & FLAG_g) {
             errno = 0;
             struct passwd *pwd = getpwuid(e->uid);
-            if (pwd == NULL) {
+            if (pwd == NULL || flags & FLAG_n) {
                 if (errno) {
                     fprintf(stderr, "ls: %s: %s\n", e->name, strerror(errno));
                     return 1;
@@ -118,7 +119,7 @@ printname(struct ent *e, uint32_t flags) {
         if (~flags & FLAG_o) {
             errno = 0;
             struct group *grp = getgrgid(e->gid);
-            if (grp == NULL) {
+            if (grp == NULL || flags & FLAG_n) {
                 if (errno) {
                     fprintf(stderr, "ls: %s: %s\n", e->name, strerror(errno));
                     return 1;
@@ -260,7 +261,7 @@ main(int argc, char **argv) {
     uint32_t flags;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1AFacghilmopuq")) != -1) {
+    while ((c = getopt(argc, argv, "1AFacghilmnopuq")) != -1) {
         switch (c) {
             case '1':
                 flags |= FLAG_1 | FLAG_q;
@@ -283,7 +284,7 @@ main(int argc, char **argv) {
                 flags &= ~FLAG_m;
                 break;
             case 'h':
-                printf("usage: %s [-1AFacgilmopuq]\n", argv[0]);
+                printf("usage: %s [-1AFacgilmnopuq]\n", argv[0]);
                 return 0;
             case 'i':
                 flags |= FLAG_i;
@@ -295,6 +296,10 @@ main(int argc, char **argv) {
             case 'm':
                 flags |= FLAG_m;
                 flags &= ~(FLAG_1 | FLAG_l);
+                break;
+            case 'n':
+                flags |= FLAG_n | FLAG_l | FLAG_1;
+                flags &= ~FLAG_m;
                 break;
             case 'o':
                 flags |= FLAG_o | FLAG_l | FLAG_1;
