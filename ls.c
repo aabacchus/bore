@@ -15,9 +15,11 @@ enum {
     FLAG_A = 1 << 1,
     FLAG_F = 1 << 2,
     FLAG_a = 1 << 3,
-    FLAG_i = 1 << 4,
-    FLAG_l = 1 << 5,
-    FLAG_p = 1 << 6,
+    FLAG_c = 1 << 4,
+    FLAG_i = 1 << 5,
+    FLAG_l = 1 << 6,
+    FLAG_p = 1 << 7,
+    FLAG_u = 1 << 8,
 };
 
 struct ent {
@@ -197,6 +199,11 @@ ls(const char *path, int flags) {
                 stt.st_rdev,
                 stt.st_mtim,
             };
+            if (flags & FLAG_u)
+                e.tim = stt.st_atim;
+            else if (flags & FLAG_c)
+                e.tim = stt.st_ctim;
+
 
             printname(&e, flags);
         }
@@ -215,6 +222,11 @@ ls(const char *path, int flags) {
             .rdev = st.st_rdev,
             .tim = st.st_mtim,
         };
+        if (flags & FLAG_u)
+            e.tim = st.st_atim;
+        else if (flags & FLAG_c)
+            e.tim = st.st_ctim;
+
         printname(&e, flags);
     }
     return 0;
@@ -225,7 +237,7 @@ main(int argc, char **argv) {
     int c, flags, ret_val;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1AFahilp")) != -1) {
+    while ((c = getopt(argc, argv, "1AFachilpu")) != -1) {
         switch (c) {
             case '1':
                 flags |= FLAG_1;
@@ -239,8 +251,11 @@ main(int argc, char **argv) {
             case 'a':
                 flags |= FLAG_a;
                 break;
+            case 'c':
+                flags |= FLAG_c;
+                break;
             case 'h':
-                printf("usage: %s [-1AFailp]\n", argv[0]);
+                printf("usage: %s [-1AFacilpu]\n", argv[0]);
                 return 0;
             case 'i':
                 flags |= FLAG_i;
@@ -250,6 +265,9 @@ main(int argc, char **argv) {
                 break;
             case 'p':
                 flags |= FLAG_p;
+                break;
+            case 'u':
+                flags |= FLAG_u;
                 break;
         }
     }
