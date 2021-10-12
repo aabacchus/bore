@@ -75,7 +75,7 @@ printname(struct ent *e, int flags) {
         pretty_print_perms(e->mode);
 
         /* number of links */
-        printf("%lu ", e->nlink);
+        printf("%4lu ", e->nlink);
 
         /* owner name */
         errno = 0;
@@ -86,10 +86,10 @@ printname(struct ent *e, int flags) {
                 return 1;
             } else {
                 /* couldn't find a user with that uid; print the numeric value */
-                printf("%d ", e->uid);
+                printf("%-8d ", e->uid);
             }
         } else {
-            printf("%s ", pwd->pw_name);
+            printf("%-8.8s ", pwd->pw_name);
         }
 
         /* group name */
@@ -101,17 +101,17 @@ printname(struct ent *e, int flags) {
                 return 1;
             } else {
                 /* couldn't find a group with that gid; print the numeric value */
-                printf("%d ", e->gid);
+                printf("%-8d ", e->gid);
             }
         } else {
-            printf("%s ", grp->gr_name);
+            printf("%-8.8s ", grp->gr_name);
         }
 
         /* size (or device info for character/block special files) */
         if (S_ISBLK(e->mode) || S_ISCHR(e->mode))
-            printf("%ld ", e->rdev);
+            printf("%8ld ", e->rdev);
         else
-            printf("%ld ", e->size);
+            printf("%8ld ", e->size);
 
         /* date and time */
     }
