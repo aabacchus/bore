@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -21,6 +22,7 @@ enum {
     FLAG_l = 1 << 6,
     FLAG_p = 1 << 7,
     FLAG_u = 1 << 8,
+    FLAG_q = 1 << 9,
 };
 
 struct ent {
@@ -69,6 +71,16 @@ pretty_print_perms(mode_t mode) {
     /* alternate method flag */
 
     printf(" ");
+}
+
+void
+qprint(const char *name, int qflag) {
+    for (const char *c = name; *c; c++) {
+        if (isprint(*c) || !qflag)
+            putchar(*c);
+        else
+            putchar('?');
+    }
 }
 
 int
@@ -129,7 +141,7 @@ printname(struct ent *e, uint32_t flags) {
         printf("%s ", buf);
     }
 
-    printf("%s", e->name);
+    qprint(e->name, flags & FLAG_q);
 
     char s = 0;
     if (flags & FLAG_p)
@@ -239,10 +251,10 @@ main(int argc, char **argv) {
     uint32_t flags;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1AFachilpu")) != -1) {
+    while ((c = getopt(argc, argv, "1AFachilpuq")) != -1) {
         switch (c) {
             case '1':
-                flags |= FLAG_1;
+                flags |= FLAG_1 | FLAG_q;
                 break;
             case 'A':
                 flags |= FLAG_A;
@@ -257,7 +269,7 @@ main(int argc, char **argv) {
                 flags |= FLAG_c;
                 break;
             case 'h':
-                printf("usage: %s [-1AFacilpu]\n", argv[0]);
+                printf("usage: %s [-1AFacilpuq]\n", argv[0]);
                 return 0;
             case 'i':
                 flags |= FLAG_i;
@@ -270,6 +282,9 @@ main(int argc, char **argv) {
                 break;
             case 'u':
                 flags |= FLAG_u;
+                break;
+            case 'q':
+                flags |= FLAG_q;
                 break;
         }
     }
