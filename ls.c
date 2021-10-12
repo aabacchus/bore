@@ -20,9 +20,10 @@ enum {
     FLAG_c = 1 << 4,
     FLAG_i = 1 << 5,
     FLAG_l = 1 << 6,
-    FLAG_p = 1 << 7,
-    FLAG_u = 1 << 8,
-    FLAG_q = 1 << 9,
+    FLAG_m = 1 << 7,
+    FLAG_p = 1 << 8,
+    FLAG_u = 1 << 9,
+    FLAG_q = 1 << 10,
 };
 
 struct ent {
@@ -162,6 +163,8 @@ printname(struct ent *e, uint32_t flags) {
     if (s != 0)
         putc(s, stdout);
 
+    if (flags & FLAG_m)
+        putchar(',');
     if (flags & FLAG_1)
         putc('\n', stdout);
     else
@@ -251,7 +254,7 @@ main(int argc, char **argv) {
     uint32_t flags;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1AFachilpuq")) != -1) {
+    while ((c = getopt(argc, argv, "1AFachilmpuq")) != -1) {
         switch (c) {
             case '1':
                 flags |= FLAG_1 | FLAG_q;
@@ -269,13 +272,16 @@ main(int argc, char **argv) {
                 flags |= FLAG_c;
                 break;
             case 'h':
-                printf("usage: %s [-1AFacilpuq]\n", argv[0]);
+                printf("usage: %s [-1AFacilmpuq]\n", argv[0]);
                 return 0;
             case 'i':
                 flags |= FLAG_i;
                 break;
             case 'l':
                 flags |= FLAG_l | FLAG_1;
+                break;
+            case 'm':
+                flags |= FLAG_m;
                 break;
             case 'p':
                 flags |= FLAG_p;
