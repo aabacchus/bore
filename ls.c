@@ -42,17 +42,17 @@ void
 pretty_print_perms(mode_t mode) {
     /* entry type */
     if (S_ISDIR(mode))
-        printf("d");
+        putchar('d');
     else if (S_ISBLK(mode))
-        printf("b");
+        putchar('b');
     else if (S_ISCHR(mode))
-        printf("c");
+        putchar('c');
     else if (S_ISLNK(mode))
-        printf("l");
+        putchar('l');
     else if (S_ISFIFO(mode))
-        printf("p");
+        putchar('p');
     else
-        printf("-");
+        putchar('-');
 
     /* loop over 0400, 0200, 0100, 040, 020, etc and print the relevant char */
     char *perms = "rwx";
@@ -66,12 +66,12 @@ pretty_print_perms(mode_t mode) {
             if (mode & (i * j))
                 printf("%c", perms[2 - i/2]);
             else
-                printf("-");
+                putchar('-');
         }
     }
     /* alternate method flag */
 
-    printf(" ");
+    putchar(' ');
 }
 
 void
@@ -161,14 +161,14 @@ printname(struct ent *e, uint32_t flags) {
             s = '*';
     }
     if (s != 0)
-        putc(s, stdout);
+        putchar(s);
 
     if (flags & FLAG_m)
         putchar(',');
     if (flags & FLAG_1)
-        putc('\n', stdout);
+        putchar('\n');
     else
-        putc(' ', stdout);
+        putchar(' ');
     return 0;
 }
 
