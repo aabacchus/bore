@@ -4,6 +4,7 @@
 #include <pwd.h>
 #include <grp.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -71,7 +72,7 @@ pretty_print_perms(mode_t mode) {
 }
 
 int
-printname(struct ent *e, int flags) {
+printname(struct ent *e, uint32_t flags) {
     if (flags & FLAG_i)
         printf("%lu ", e->ino);
     if (flags & FLAG_l) {
@@ -157,7 +158,7 @@ printname(struct ent *e, int flags) {
 }
 
 int
-ls(const char *path, int flags) {
+ls(const char *path, uint32_t flags) {
     struct stat st;
     if (lstat(path, &st) == -1) {
         fprintf(stderr, "ls: %s: %s\n", path, strerror(errno));
@@ -234,7 +235,8 @@ ls(const char *path, int flags) {
 
 int
 main(int argc, char **argv) {
-    int c, flags, ret_val;
+    int c, ret_val;
+    uint32_t flags;
     flags = ret_val = 0;
 
     while ((c = getopt(argc, argv, "1AFachilpu")) != -1) {
