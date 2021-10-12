@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 
 enum {
@@ -28,6 +29,7 @@ struct ent {
     gid_t gid;
     off_t size;
     dev_t rdev;
+    struct timespec tim;
 };
 
 void
@@ -114,6 +116,14 @@ printname(struct ent *e, int flags) {
             printf("%8ld ", e->size);
 
         /* date and time */
+        struct tm *tm = localtime(&e->tim.tv_sec);
+        if (tm == NULL) {
+            fprintf(stderr, "ls: %s: %s\n", e->name, strerror(errno));
+            return 1;
+        }
+        char buf[sizeof "MMM DD HH:MM"];
+        strftime(buf, sizeof(buf), "%b %e %H:%M", tm);
+        printf("%s ", buf);
     }
 
     printf("%s", e->name);
@@ -185,6 +195,7 @@ ls(const char *path, int flags) {
                 stt.st_gid,
                 stt.st_size,
                 stt.st_rdev,
+                stt.st_mtim,
             };
 
             printname(&e, flags);
@@ -202,6 +213,7 @@ ls(const char *path, int flags) {
             .gid = st.st_gid,
             .size = st.st_size,
             .rdev = st.st_rdev,
+            .tim = st.st_mtim,
         };
         printname(&e, flags);
     }
