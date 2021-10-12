@@ -9,10 +9,11 @@
 
 enum {
     FLAG_1 = 1 << 0,
-    FLAG_F = 1 << 1,
-    FLAG_a = 1 << 2,
-    FLAG_l = 1 << 3,
-    FLAG_p = 1 << 4,
+    FLAG_A = 1 << 1,
+    FLAG_F = 1 << 2,
+    FLAG_a = 1 << 3,
+    FLAG_l = 1 << 4,
+    FLAG_p = 1 << 5,
 };
 
 struct ent {
@@ -68,7 +69,13 @@ ls(const char *path, int flags) {
             return 1;
         }
         for (i = 0; i < n; i++) {
-            if (~flags & FLAG_a && dp[i]->d_name[0] == '.')
+            if (~flags & FLAG_a && ~flags & FLAG_A && dp[i]->d_name[0] == '.')
+                /* if no -A or -a, skip \.* */
+                continue;
+            if (flags & FLAG_A && dp[i]->d_name[0] == '.'
+                    && (dp[i]->d_name[1] == '\0'
+                        || (dp[i]->d_name[1] == '.' && dp[i]->d_name[2] == '\0')))
+                /* if -A, skip '.' or '..' */
                 continue;
 
             struct stat stt;
@@ -98,10 +105,13 @@ main(int argc, char **argv) {
     int c, flags, ret_val;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1Fahlp")) != -1) {
+    while ((c = getopt(argc, argv, "1AFahlp")) != -1) {
         switch (c) {
             case '1':
                 flags |= FLAG_1;
+                break;
+            case 'A':
+                flags |= FLAG_A;
                 break;
             case 'F':
                 flags |= FLAG_F;
@@ -110,7 +120,7 @@ main(int argc, char **argv) {
                 flags |= FLAG_a;
                 break;
             case 'h':
-                printf("usage: %s [-1Falp]\n", argv[0]);
+                printf("usage: %s [-1AFalp]\n", argv[0]);
                 return 0;
             case 'l':
                 flags |= FLAG_l | FLAG_1;
