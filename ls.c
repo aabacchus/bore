@@ -21,12 +21,61 @@ struct ent {
     const char *name;
     ino_t ino;
     mode_t mode;
+    nlink_t nlink;
+    uid_t uid;
+    gid_t gid;
+    off_t size;
 };
+
+void
+pretty_print_perms(mode_t mode) {
+    /* entry type */
+    if (S_ISDIR(mode))
+        printf("d");
+    else if (S_ISBLK(mode))
+        printf("b");
+    else if (S_ISCHR(mode))
+        printf("c");
+    else if (S_ISLNK(mode))
+        printf("l");
+    else if (S_ISFIFO(mode))
+        printf("p");
+    else
+        printf("-");
+
+    /* loop over 0400, 0200, 0100, 040, 020, etc and print the relevant char */
+    char *perms = "rwx";
+    for (int p = 2; p >= 0; p--) {
+        for (int i = 04; i >= 1; i /= 2) {
+            /* the following is a way of doing j = 010 to the power p */
+            int j = 01;
+            for (int k = 0; k < p; k++)
+                j *= 010;
+
+            if (mode & (i * j))
+                printf("%c", perms[2 - i/2]);
+            else
+                printf("-");
+        }
+    }
+    /* alternate method flag */
+
+    printf(" ");
+}
 
 int
 printname(struct ent *e, int flags) {
     if (flags & FLAG_i)
         printf("%lu ", e->ino);
+    if (flags & FLAG_l) {
+        /* file mode */
+        pretty_print_perms(e->mode);
+        /* number of links */
+        /* owner name */
+        /* group name */
+        /* size (or device info for character/block special files) */
+        /* date and time */
+    }
 
     printf("%s", e->name);
 
@@ -92,6 +141,10 @@ ls(const char *path, int flags) {
                 dp[i]->d_name,
                 stt.st_ino,
                 stt.st_mode,
+                stt.st_nlink,
+                stt.st_uid,
+                stt.st_gid,
+                stt.st_size,
             };
 
             printname(&e, flags);
@@ -100,7 +153,15 @@ ls(const char *path, int flags) {
         free(dp);
     } else {
         /* file */
-        struct ent e = { .name = path, .mode = st.st_mode };
+        struct ent e = {
+            .name = path,
+            .ino  = st.st_ino,
+            .mode = st.st_mode,
+            .nlink = st.st_nlink,
+            .uid = st.st_uid,
+            .gid = st.st_gid,
+            .size = st.st_size,
+        };
         printname(&e, flags);
     }
     return 0;
