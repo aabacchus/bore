@@ -27,6 +27,7 @@ struct ent {
     uid_t uid;
     gid_t gid;
     off_t size;
+    dev_t rdev;
 };
 
 void
@@ -105,7 +106,13 @@ printname(struct ent *e, int flags) {
         } else {
             printf("%s ", grp->gr_name);
         }
+
         /* size (or device info for character/block special files) */
+        if (S_ISBLK(e->mode) || S_ISCHR(e->mode))
+            printf("%ld ", e->rdev);
+        else
+            printf("%ld ", e->size);
+
         /* date and time */
     }
 
@@ -177,6 +184,7 @@ ls(const char *path, int flags) {
                 stt.st_uid,
                 stt.st_gid,
                 stt.st_size,
+                stt.st_rdev,
             };
 
             printname(&e, flags);
@@ -193,6 +201,7 @@ ls(const char *path, int flags) {
             .uid = st.st_uid,
             .gid = st.st_gid,
             .size = st.st_size,
+            .rdev = st.st_rdev,
         };
         printname(&e, flags);
     }
