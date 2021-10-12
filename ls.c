@@ -18,12 +18,14 @@ enum {
     FLAG_F = 1 << 2,
     FLAG_a = 1 << 3,
     FLAG_c = 1 << 4,
-    FLAG_i = 1 << 5,
-    FLAG_l = 1 << 6,
-    FLAG_m = 1 << 7,
-    FLAG_p = 1 << 8,
-    FLAG_u = 1 << 9,
-    FLAG_q = 1 << 10,
+    FLAG_g = 1 << 5,
+    FLAG_i = 1 << 6,
+    FLAG_l = 1 << 7,
+    FLAG_m = 1 << 8,
+    FLAG_o = 1 << 9,
+    FLAG_p = 1 << 10,
+    FLAG_u = 1 << 11,
+    FLAG_q = 1 << 12,
 };
 
 struct ent {
@@ -96,33 +98,37 @@ printname(struct ent *e, uint32_t flags) {
         printf("%4lu ", e->nlink);
 
         /* owner name */
-        errno = 0;
-        struct passwd *pwd = getpwuid(e->uid);
-        if (pwd == NULL) {
-            if (errno) {
-                fprintf(stderr, "ls: %s: %s\n", e->name, strerror(errno));
-                return 1;
+        if (~flags & FLAG_g) {
+            errno = 0;
+            struct passwd *pwd = getpwuid(e->uid);
+            if (pwd == NULL) {
+                if (errno) {
+                    fprintf(stderr, "ls: %s: %s\n", e->name, strerror(errno));
+                    return 1;
+                } else {
+                    /* couldn't find a user with that uid; print the numeric value */
+                    printf("%-8d ", e->uid);
+                }
             } else {
-                /* couldn't find a user with that uid; print the numeric value */
-                printf("%-8d ", e->uid);
+                printf("%-8.8s ", pwd->pw_name);
             }
-        } else {
-            printf("%-8.8s ", pwd->pw_name);
         }
 
         /* group name */
-        errno = 0;
-        struct group *grp = getgrgid(e->gid);
-        if (grp == NULL) {
-            if (errno) {
-                fprintf(stderr, "ls: %s: %s\n", e->name, strerror(errno));
-                return 1;
+        if (~flags & FLAG_o) {
+            errno = 0;
+            struct group *grp = getgrgid(e->gid);
+            if (grp == NULL) {
+                if (errno) {
+                    fprintf(stderr, "ls: %s: %s\n", e->name, strerror(errno));
+                    return 1;
+                } else {
+                    /* couldn't find a group with that gid; print the numeric value */
+                    printf("%-8d ", e->gid);
+                }
             } else {
-                /* couldn't find a group with that gid; print the numeric value */
-                printf("%-8d ", e->gid);
+                printf("%-8.8s ", grp->gr_name);
             }
-        } else {
-            printf("%-8.8s ", grp->gr_name);
         }
 
         /* size (or device info for character/block special files) */
@@ -254,7 +260,7 @@ main(int argc, char **argv) {
     uint32_t flags;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1AFachilmpuq")) != -1) {
+    while ((c = getopt(argc, argv, "1AFacghilmopuq")) != -1) {
         switch (c) {
             case '1':
                 flags |= FLAG_1 | FLAG_q;
@@ -272,8 +278,12 @@ main(int argc, char **argv) {
                 flags |= FLAG_c;
                 flags &= ~FLAG_u;
                 break;
+            case 'g':
+                flags |= FLAG_g | FLAG_l | FLAG_1;
+                flags &= ~FLAG_m;
+                break;
             case 'h':
-                printf("usage: %s [-1AFacilmpuq]\n", argv[0]);
+                printf("usage: %s [-1AFacgilmopuq]\n", argv[0]);
                 return 0;
             case 'i':
                 flags |= FLAG_i;
@@ -285,6 +295,10 @@ main(int argc, char **argv) {
             case 'm':
                 flags |= FLAG_m;
                 flags &= ~(FLAG_1 | FLAG_l);
+                break;
+            case 'o':
+                flags |= FLAG_o | FLAG_l | FLAG_1;
+                flags &= ~FLAG_m;
                 break;
             case 'p':
                 flags |= FLAG_p;
