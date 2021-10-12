@@ -270,6 +270,7 @@ main(int argc, char **argv) {
                 break;
             case 'c':
                 flags |= FLAG_c;
+                flags &= ~FLAG_u;
                 break;
             case 'h':
                 printf("usage: %s [-1AFacilmpuq]\n", argv[0]);
@@ -279,15 +280,18 @@ main(int argc, char **argv) {
                 break;
             case 'l':
                 flags |= FLAG_l | FLAG_1;
+                flags &= ~FLAG_m;
                 break;
             case 'm':
                 flags |= FLAG_m;
+                flags &= ~(FLAG_1 | FLAG_l);
                 break;
             case 'p':
                 flags |= FLAG_p;
                 break;
             case 'u':
                 flags |= FLAG_u;
+                flags &= ~FLAG_c;
                 break;
             case 'q':
                 flags |= FLAG_q;
