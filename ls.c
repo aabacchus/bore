@@ -108,7 +108,7 @@ printname(struct ent *e, uint32_t flags) {
                     return 1;
                 } else {
                     /* couldn't find a user with that uid; print the numeric value */
-                    printf("%-8d ", e->uid);
+                    printf("%-8u ", e->uid);
                 }
             } else {
                 printf("%-8.8s ", pwd->pw_name);
@@ -125,7 +125,7 @@ printname(struct ent *e, uint32_t flags) {
                     return 1;
                 } else {
                     /* couldn't find a group with that gid; print the numeric value */
-                    printf("%-8d ", e->gid);
+                    printf("%-8u ", e->gid);
                 }
             } else {
                 printf("%-8.8s ", grp->gr_name);
