@@ -1,6 +1,8 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <pwd.h>
+#include <grp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -70,10 +72,39 @@ printname(struct ent *e, int flags) {
     if (flags & FLAG_l) {
         /* file mode */
         pretty_print_perms(e->mode);
+
         /* number of links */
         printf("%lu ", e->nlink);
+
         /* owner name */
+        errno = 0;
+        struct passwd *pwd = getpwuid(e->uid);
+        if (pwd == NULL) {
+            if (errno) {
+                fprintf(stderr, "ls: %s: %s\n", e->name, strerror(errno));
+                return 1;
+            } else {
+                /* couldn't find a user with that uid; print the numeric value */
+                printf("%d ", e->uid);
+            }
+        } else {
+            printf("%s ", pwd->pw_name);
+        }
+
         /* group name */
+        errno = 0;
+        struct group *grp = getgrgid(e->gid);
+        if (grp == NULL) {
+            if (errno) {
+                fprintf(stderr, "ls: %s: %s\n", e->name, strerror(errno));
+                return 1;
+            } else {
+                /* couldn't find a group with that gid; print the numeric value */
+                printf("%d ", e->gid);
+            }
+        } else {
+            printf("%s ", grp->gr_name);
+        }
         /* size (or device info for character/block special files) */
         /* date and time */
     }
