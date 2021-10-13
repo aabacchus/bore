@@ -16,21 +16,26 @@ enum {
     FLAG_1 = 1 << 0,
     FLAG_A = 1 << 1,
     FLAG_F = 1 << 2,
-    FLAG_a = 1 << 3,
-    FLAG_c = 1 << 4,
-    FLAG_g = 1 << 5,
-    FLAG_i = 1 << 6,
-    FLAG_l = 1 << 7,
-    FLAG_m = 1 << 8,
-    FLAG_n = 1 << 9,
-    FLAG_o = 1 << 10,
-    FLAG_p = 1 << 11,
-    FLAG_u = 1 << 12,
-    FLAG_q = 1 << 13,
+    FLAG_S = 1 << 3,
+    FLAG_a = 1 << 4,
+    FLAG_c = 1 << 5,
+    FLAG_g = 1 << 6,
+    FLAG_i = 1 << 7,
+    FLAG_l = 1 << 8,
+    FLAG_m = 1 << 9,
+    FLAG_n = 1 << 10,
+    FLAG_o = 1 << 11,
+    FLAG_p = 1 << 12,
+    FLAG_u = 1 << 13,
+    FLAG_q = 1 << 14,
+    FLAG_r = 1 << 15,
+    FLAG_t = 1 << 16,
 };
 
+uint32_t flags;
+
 struct ent {
-    const char *name;
+    char *name;
     ino_t ino;
     mode_t mode;
     nlink_t nlink;
@@ -88,7 +93,7 @@ qprint(const char *name, int qflag) {
 }
 
 int
-printname(struct ent *e, uint32_t flags) {
+printname(struct ent *e) {
     if (flags & FLAG_i)
         printf("%lu ", e->ino);
     if (flags & FLAG_l) {
@@ -179,89 +184,155 @@ printname(struct ent *e, uint32_t flags) {
     return 0;
 }
 
+/* entries is an array of struct ents, each of which has a name on the heap.
+ * free_all frees those names, then frees the array.
+ */
+void
+free_all(struct ent *entries, size_t num_entries) {
+    for (size_t i = 0; i < num_entries; i++)
+        free(entries[i].name);
+    free(entries);
+}
+
 int
-ls(const char *path, uint32_t flags) {
+ls(const char *path) {
     struct stat st;
     if (lstat(path, &st) == -1) {
         fprintf(stderr, "ls: %s: %s\n", path, strerror(errno));
         return 1;
     }
+
+    size_t num_entries = 0;
+    struct ent *entries = NULL;
+
+    DIR *dirp = NULL;
+    struct dirent *dp = NULL;
+
     if (S_ISDIR(st.st_mode)) {
         /* directory */
-        int n, i;
-        struct dirent **dp;
-        int dfd = open(path, O_RDONLY);
-        n = scandir(path, &dp, 0, alphasort);
-        if (n == -1) {
+        dirp = opendir(path);
+        if (dirp == NULL) {
             fprintf(stderr, "ls: %s: %s\n", path, strerror(errno));
             return 1;
         }
-        for (i = 0; i < n; i++) {
-            if (~flags & FLAG_a && ~flags & FLAG_A && dp[i]->d_name[0] == '.')
+        int dfd = dirfd(dirp);
+        if (dfd == -1) {
+            fprintf(stderr, "ls: %s: %s\n", path, strerror(errno));
+            goto closedir_and_die;
+        }
+
+        do {
+            errno = 0;
+            dp = readdir(dirp);
+            if (dp == NULL) {
+                if (errno == 0) {
+                    /* end of directory */
+                    closedir(dirp);
+                    goto finished_scan;
+                }
+                fprintf(stderr, "ls: %s: %s\n", path, strerror(errno));
+                free_all(entries, num_entries);
+                goto closedir_and_die;
+            }
+
+            if (~flags & FLAG_a && ~flags & FLAG_A && dp->d_name[0] == '.')
                 /* if no -A or -a, skip \.* */
                 continue;
-            if (flags & FLAG_A && dp[i]->d_name[0] == '.'
-                    && (dp[i]->d_name[1] == '\0'
-                        || (dp[i]->d_name[1] == '.' && dp[i]->d_name[2] == '\0')))
+            if (flags & FLAG_A && dp->d_name[0] == '.'
+                    && (dp->d_name[1] == '\0'
+                        || (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
                 /* if -A, skip '.' or '..' */
                 continue;
 
             struct stat stt;
-            if (fstatat(dfd, dp[i]->d_name, &stt, AT_SYMLINK_NOFOLLOW) == -1) {
-                fprintf(stderr, "ls: %s: %s\n", dp[i]->d_name, strerror(errno));
-                return 1;
+            if (fstatat(dfd, dp->d_name, &stt, AT_SYMLINK_NOFOLLOW) == -1) {
+                fprintf(stderr, "ls: %s: %s\n", dp->d_name, strerror(errno));
+                free_all(entries, num_entries);
+                goto closedir_and_die;
             }
-            struct ent e = {
-                dp[i]->d_name,
-                stt.st_ino,
-                stt.st_mode,
-                stt.st_nlink,
-                stt.st_uid,
-                stt.st_gid,
-                stt.st_size,
-                stt.st_rdev,
-                stt.st_mtim,
-            };
+
+            /* add entry to entries */
+            num_entries++;
+            struct ent *tmp = realloc(entries, num_entries * sizeof(struct ent));
+            if (tmp == NULL) {
+                fprintf(stderr, "ls: realloc: %s\n", strerror(errno));
+                free_all(entries, num_entries);
+                goto closedir_and_die;
+            }
+            entries = tmp;
+            entries[num_entries - 1].name  = strdup(dp->d_name);
+            entries[num_entries - 1].ino   = stt.st_ino;
+            entries[num_entries - 1].mode  = stt.st_mode;
+            entries[num_entries - 1].nlink = stt.st_nlink;
+            entries[num_entries - 1].uid   = stt.st_uid;
+            entries[num_entries - 1].gid   = stt.st_gid;
+            entries[num_entries - 1].size  = stt.st_size;
+            entries[num_entries - 1].rdev  = stt.st_rdev;
+            entries[num_entries - 1].tim   = stt.st_mtim;
             if (flags & FLAG_u)
-                e.tim = stt.st_atim;
+                entries[num_entries - 1].tim = stt.st_atim;
             else if (flags & FLAG_c)
-                e.tim = stt.st_ctim;
+                entries[num_entries - 1].tim = stt.st_ctim;
 
+        } while (dp != NULL);
 
-            printname(&e, flags);
+        if (closedir(dirp) == -1) {
+            fprintf(stderr, "ls: %s: %s\n", path, strerror(errno));
+            free_all(entries, num_entries);
+            return 1;
         }
-        close(dfd);
-        free(dp);
+        //free(dp);
     } else {
         /* file */
-        struct ent e = {
-            .name = path,
-            .ino  = st.st_ino,
-            .mode = st.st_mode,
-            .nlink = st.st_nlink,
-            .uid = st.st_uid,
-            .gid = st.st_gid,
-            .size = st.st_size,
-            .rdev = st.st_rdev,
-            .tim = st.st_mtim,
-        };
+        num_entries++;
+        struct ent *tmp = realloc(entries, num_entries * sizeof(struct ent));
+        if (tmp == NULL) {
+            fprintf(stderr, "ls: realloc: %s\n", strerror(errno));
+            free_all(entries, num_entries);
+            return 1;
+        }
+        entries = tmp;
+        entries[num_entries - 1].name  = strdup(path);
+        entries[num_entries - 1].ino   = st.st_ino;
+        entries[num_entries - 1].mode  = st.st_mode;
+        entries[num_entries - 1].nlink = st.st_nlink;
+        entries[num_entries - 1].uid   = st.st_uid;
+        entries[num_entries - 1].gid   = st.st_gid;
+        entries[num_entries - 1].size  = st.st_size;
+        entries[num_entries - 1].rdev  = st.st_rdev;
+        entries[num_entries - 1].tim   = st.st_mtim;
         if (flags & FLAG_u)
-            e.tim = st.st_atim;
+            entries[num_entries - 1].tim = st.st_atim;
         else if (flags & FLAG_c)
-            e.tim = st.st_ctim;
-
-        printname(&e, flags);
+            entries[num_entries - 1].tim = st.st_ctim;
     }
+
+finished_scan:
+    // sort(&entries, num_entries);
+    for (size_t i = 0; i < num_entries; i++) {
+        printname(&entries[i]);
+    }
+
+    free_all(entries, num_entries);
     return 0;
+
+closedir_and_die:
+    if (closedir(dirp) == -1) {
+        fprintf(stderr, "ls: %s: %s\n", path, strerror(errno));
+        free_all(entries, num_entries);
+        return 1;
+    }
+    //free(dp);
+
+    return 1;
 }
 
 int
 main(int argc, char **argv) {
     int c, ret_val;
-    uint32_t flags;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1AFacghilmnopuq")) != -1) {
+    while ((c = getopt(argc, argv, "1AFSacghilmnopuqrt")) != -1) {
         switch (c) {
             case '1':
                 flags |= FLAG_1 | FLAG_q;
@@ -271,6 +342,9 @@ main(int argc, char **argv) {
                 break;
             case 'F':
                 flags |= FLAG_F;
+                break;
+            case 'S':
+                flags |= FLAG_S;
                 break;
             case 'a':
                 flags |= FLAG_a;
@@ -284,7 +358,7 @@ main(int argc, char **argv) {
                 flags &= ~FLAG_m;
                 break;
             case 'h':
-                printf("usage: %s [-1AFacgilmnopuq]\n", argv[0]);
+                printf("usage: %s [-1AFSacgilmnopuqrt]\n", argv[0]);
                 return 0;
             case 'i':
                 flags |= FLAG_i;
@@ -315,6 +389,12 @@ main(int argc, char **argv) {
             case 'q':
                 flags |= FLAG_q;
                 break;
+            case 'r':
+                flags |= FLAG_r;
+                break;
+            case 't':
+                flags |= FLAG_t;
+                break;
         }
     }
     argv += optind - 1;
@@ -323,11 +403,11 @@ main(int argc, char **argv) {
         flags |= FLAG_1;
 
     if (argc == optind) {
-        if (ls(".", flags) != 0)
+        if (ls(".") != 0)
             ret_val = 1;
     }
     else while (*++argv)
-        if (ls(*argv, flags) != 0)
+        if (ls(*argv) != 0)
             ret_val = 1;
 
     if (!(flags & FLAG_1))
