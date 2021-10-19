@@ -62,19 +62,38 @@ pretty_print_perms(mode_t mode) {
     else
         putchar('-');
 
-    /* loop over 0400, 0200, 0100, 040, 020, etc and print the relevant char */
-    char *perms = "rwx";
+    /* loop over 0400, 0200, 040, 020, etc and print the relevant char */
+    char *perms = "rw";
     for (int p = 2; p >= 0; p--) {
+        /* the following is a way of doing j = 010 to the power p */
+        int j = 01;
+        for (int k = 0; k < p; k++)
+            j *= 010;
         for (int i = 04; i >= 1; i /= 2) {
-            /* the following is a way of doing j = 010 to the power p */
-            int j = 01;
-            for (int k = 0; k < p; k++)
-                j *= 010;
+            if (i > 1) {
+                if (mode & (i * j))
+                    printf("%c", perms[2 - i/2]);
+                else
+                    putchar('-');
+            } else {
+                /* i == 1 */
 
-            if (mode & (i * j))
-                printf("%c", perms[2 - i/2]);
-            else
-                putchar('-');
+                if ((mode & S_ISUID && p == 2)
+                        || (mode & S_ISGID && p == 1))
+                    if (~mode & j)
+                        putchar('S');
+                    else
+                        putchar('s');
+                else if (p == 0 && S_ISDIR(mode) && mode & S_ISVTX)
+                    if (~mode & j)
+                        putchar('T');
+                    else
+                        putchar('t');
+                else if (mode & j)
+                    putchar('x');
+                else
+                    putchar('-');
+            }
         }
     }
     /* alternate method flag */
