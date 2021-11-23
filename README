@@ -2,10 +2,25 @@ bore: Ben's cORE
 ==========
 
 My basic set of core utilities. Watch this space!
-They probably will be POSIX.
+They shall implement commands and utilities from POSIX.1-2017, with
+almost no extensions to the standard (check the PROGRESS file). They are written
+using only the standard POSIX.1-2008 C library (-D_XOPEN_SOURCE=700).
+
+Each utility is a single self-contained file, relying on no internal libraries.
 
 The software found in this repository has been dedicated to the public domain.
 See UNLICENSE for more details.
+
+Building
+--------
+
+The requirements are:
+
+* Any C99 compiler
+* Any POSIX.1-2008 standard C library
+* Any POSIX make implementation (optional; you can compile manually)
+
+Just type `make`, and the binaries shall be compiled into the bin/ directory.
 
 Contributing
 ------------
