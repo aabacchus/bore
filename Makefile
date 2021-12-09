@@ -5,6 +5,7 @@ BINS = \
 	echo \
 	ed \
 	false \
+	grep \
 	head \
 	ls \
 	mkdir \

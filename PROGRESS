@@ -17,7 +17,7 @@
 [ ] ed [-ps] p i a q Q
 [x] false
 [ ] find
-[ ] grep
+[ ] grep [-icv]
 [x] head [-n]
 [ ] id
 [ ] kill
