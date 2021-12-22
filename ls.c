@@ -184,6 +184,23 @@ printname(struct ent *e) {
     return 0;
 }
 
+int
+sort(const void *s1, const void *s2) {
+    int ret = 0;
+    const struct ent *e1 = (struct ent *)s1;
+    const struct ent *e2 = (struct ent *)s2;
+
+    if (flags & FLAG_S)
+        ret = e2->size - e1->size;
+    if (flags & FLAG_t)
+        ret = e2->tim.tv_sec - e1->tim.tv_sec;
+    if (ret == 0)
+        ret = strcmp(e1->name, e2->name);
+    if (flags & FLAG_r)
+        ret *= -1;
+    return ret;
+}
+
 /* entries is an array of struct ents, each of which has a name on the heap.
  * free_all frees those names, then frees the array.
  */
@@ -308,7 +325,7 @@ ls(const char *path) {
     }
 
 finished_scan:
-    // sort(&entries, num_entries);
+    qsort(entries, num_entries, sizeof(struct ent), sort);
     for (size_t i = 0; i < num_entries; i++) {
         printname(&entries[i]);
     }
@@ -332,7 +349,7 @@ main(int argc, char **argv) {
     int c, ret_val;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1AFSacghilmnopuqrt")) != -1) {
+    while ((c = getopt(argc, argv, "1AFSacghilmnopqrtu")) != -1) {
         switch (c) {
             case '1':
                 flags |= FLAG_1 | FLAG_q;
@@ -358,7 +375,7 @@ main(int argc, char **argv) {
                 flags &= ~FLAG_m;
                 break;
             case 'h':
-                printf("usage: %s [-1AFSacgilmnopuqrt]\n", argv[0]);
+                printf("usage: %s [-1AFSacgilmnopqrtu]\n", argv[0]);
                 return 0;
             case 'i':
                 flags |= FLAG_i;
