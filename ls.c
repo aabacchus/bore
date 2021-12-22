@@ -26,10 +26,10 @@ enum {
     FLAG_n = 1 << 10,
     FLAG_o = 1 << 11,
     FLAG_p = 1 << 12,
-    FLAG_u = 1 << 13,
-    FLAG_q = 1 << 14,
-    FLAG_r = 1 << 15,
-    FLAG_t = 1 << 16,
+    FLAG_q = 1 << 13,
+    FLAG_r = 1 << 14,
+    FLAG_t = 1 << 15,
+    FLAG_u = 1 << 16,
 };
 
 uint32_t flags;
