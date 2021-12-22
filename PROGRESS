@@ -22,7 +22,7 @@
 [ ] id
 [ ] kill
 [ ] ln
-[ ] ls [-1AFSacgimnopqrtu]
+[ ] ls [-1AFSacfgimnopqrtu]
 [ ] mkdir
 [ ] more
 [ ] mv

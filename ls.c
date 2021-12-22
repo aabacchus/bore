@@ -19,17 +19,18 @@ enum {
     FLAG_S = 1 << 3,
     FLAG_a = 1 << 4,
     FLAG_c = 1 << 5,
-    FLAG_g = 1 << 6,
-    FLAG_i = 1 << 7,
-    FLAG_l = 1 << 8,
-    FLAG_m = 1 << 9,
-    FLAG_n = 1 << 10,
-    FLAG_o = 1 << 11,
-    FLAG_p = 1 << 12,
-    FLAG_q = 1 << 13,
-    FLAG_r = 1 << 14,
-    FLAG_t = 1 << 15,
-    FLAG_u = 1 << 16,
+    FLAG_f = 1 << 6,
+    FLAG_g = 1 << 7,
+    FLAG_i = 1 << 8,
+    FLAG_l = 1 << 9,
+    FLAG_m = 1 << 10,
+    FLAG_n = 1 << 11,
+    FLAG_o = 1 << 12,
+    FLAG_p = 1 << 13,
+    FLAG_q = 1 << 14,
+    FLAG_r = 1 << 15,
+    FLAG_t = 1 << 16,
+    FLAG_u = 1 << 17,
 };
 
 uint32_t flags;
@@ -344,7 +345,8 @@ ls(const char *path) {
     }
 
 finished_scan:
-    qsort(entries, num_entries, sizeof(struct ent), sort);
+    if (~flags & FLAG_f)
+        qsort(entries, num_entries, sizeof(struct ent), sort);
     for (size_t i = 0; i < num_entries; i++) {
         printname(&entries[i]);
     }
@@ -368,7 +370,7 @@ main(int argc, char **argv) {
     int c, ret_val;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1AFSacghilmnopqrtu")) != -1) {
+    while ((c = getopt(argc, argv, "1AFSacfghilmnopqrtu")) != -1) {
         switch (c) {
             case '1':
                 flags |= FLAG_1 | FLAG_q;
@@ -390,12 +392,15 @@ main(int argc, char **argv) {
                 flags |= FLAG_c;
                 flags &= ~FLAG_u;
                 break;
+            case 'f':
+                flags |= FLAG_f;
+                break;
             case 'g':
                 flags |= FLAG_g | FLAG_l | FLAG_1;
                 flags &= ~FLAG_m;
                 break;
             case 'h':
-                printf("usage: %s [-1AFSacgilmnopqrtu]\n", argv[0]);
+                printf("usage: %s [-1AFSacfgilmnopqrtu]\n", argv[0]);
                 return 0;
             case 'i':
                 flags |= FLAG_i;
