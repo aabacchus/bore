@@ -381,6 +381,7 @@ main(int argc, char **argv) {
                 break;
             case 'S':
                 flags |= FLAG_S;
+                flags &= ~FLAG_t;
                 break;
             case 'a':
                 flags |= FLAG_a;
@@ -430,6 +431,7 @@ main(int argc, char **argv) {
                 break;
             case 't':
                 flags |= FLAG_t;
+                flags &= ~FLAG_S;
                 break;
         }
     }
