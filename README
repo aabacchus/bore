@@ -25,9 +25,9 @@ Just type `make`, and the binaries shall be compiled into the bin/ directory.
 Contributing
 ------------
 
-Contributions are welcome; please send patches to me via email (or communicate
-by means of git-request-pull(1)), and make sure either the commit message or
-the file contains a public domain dedication.
+Contributions are welcome; please email patches to me at <ben@bvnf.space> (or
+communicate by means of git-request-pull(1)), and make sure either the commit
+message or the file contains a public domain dedication.
 
 Programming style guide
 -----------------------

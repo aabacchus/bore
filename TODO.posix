@@ -1,0 +1,126 @@
+# these are all the POSIX.1-2017 utilities (except for shell builtins)
+[ ] ar
+[ ] asa
+[ ] awk
+[ ] basename
+[ ] bc
+[ ] c99
+[ ] cal
+[x] cat
+[ ] cflow
+[ ] chgrp
+[ ] chmod
+[ ] chown
+[ ] cksum
+[ ] cmp
+[ ] colon
+[ ] comm
+[ ] compress
+[ ] cp
+[ ] crontab
+[ ] csplit
+[ ] ctags
+[ ] cut
+[ ] cxref
+[ ] date
+[ ] dd
+[ ] df
+[ ] diff
+[ ] dirname
+[ ] du
+[x] echo
+[.] ed
+[ ] env
+[ ] ex
+[ ] expand
+[ ] expr
+[x] false
+[ ] file
+[ ] find
+[ ] fold
+[ ] fort77
+[ ] fuser
+[ ] gencat
+[ ] getconf
+[ ] getopts
+[.] grep
+[x] head
+[ ] iconv
+[ ] id
+[ ] ipcrm
+[ ] ipcs
+[ ] join
+[ ] kill
+[ ] lex
+[ ] link
+[ ] ln
+[ ] locale
+[ ] localedef
+[ ] logger
+[ ] logname
+[ ] lp
+[.] ls
+[ ] m4
+[ ] mailx
+[ ] make
+[ ] man
+[ ] mesg
+[.] mkdir
+[ ] mkfifo
+[ ] more
+[ ] mv
+[ ] newgrp
+[ ] nice
+[ ] nl
+[ ] nm
+[ ] nohup
+[ ] od
+[ ] paste
+[ ] patch
+[ ] pathchk
+[ ] pax
+[ ] pr
+[ ] printf
+[ ] prs
+[ ] ps
+[ ] pwd
+[ ] renice
+[ ] rm
+[ ] rmdir
+[ ] sed
+[ ] sh
+[ ] sleep
+[.] sort
+[ ] split
+[ ] strings
+[ ] strip
+[ ] stty
+[ ] tabs
+[ ] tail
+[ ] talk
+[x] tee
+[ ] test
+[ ] time
+[ ] times
+[ ] touch
+[ ] tput
+[ ] tr
+[x] true
+[ ] tsort
+[x] tty
+[ ] ulimit
+[ ] umask
+[ ] uname
+[ ] uncompress
+[ ] unexpand
+[ ] uniq
+[ ] unlink
+[ ] uudecode
+[ ] uuencode
+[ ] vi
+[.] wc
+[ ] who
+[ ] write
+[ ] xargs
+[ ] yacc
+[ ] zcat
