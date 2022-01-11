@@ -83,7 +83,7 @@
 [ ] printf
 [ ] prs
 [ ] ps
-[ ] pwd
+[x] pwd
 [ ] renice
 [ ] rm
 [ ] rmdir

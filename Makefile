@@ -9,6 +9,7 @@ BINS = \
 	head \
 	ls \
 	mkdir \
+	pwd \
 	sort \
 	tee \
 	true \

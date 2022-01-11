@@ -29,7 +29,7 @@
 [ ] nl
 [ ] printf
 [ ] ps
-[ ] pwd
+[x] pwd [-LP]
 [ ] rm
 [ ] rmdir
 [ ] shred
