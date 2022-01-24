@@ -17,7 +17,7 @@ BINS = \
 	wc \
 
 CC = cc
-XCFLAGS = $(CFLAGS) -Wall -Wextra -Wpedantic -g -D_XOPEN_SOURCE=700
+XCFLAGS = $(CFLAGS) -Wall -Wextra -Wpedantic -g
 XLDFLAGS = $(LDFLAGS)
 
 .PHONY: clean

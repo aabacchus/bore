@@ -4,7 +4,7 @@ bore: Ben's cORE
 My basic set of core utilities. Watch this space!
 They shall implement commands and utilities from POSIX.1-2017, with
 almost no extensions to the standard (check the PROGRESS file). They are written
-using only the standard POSIX.1-2008 C library (-D_XOPEN_SOURCE=700).
+using only the standard POSIX.1-2008 C library (_XOPEN_SOURCE=700).
 
 Each utility is a single self-contained file, relying on no internal libraries.
 
