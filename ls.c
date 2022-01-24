@@ -449,6 +449,7 @@ main(int argc, char **argv) {
         if (ls(".") != 0)
             ret_val = 1;
     }
+    // TODO: if multiple separate files are given, they are not sorted (eg ls -lSr *.c)
     else while (*++argv)
         if (ls(*argv) != 0)
             ret_val = 1;
