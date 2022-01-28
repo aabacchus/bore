@@ -86,7 +86,7 @@
 [x] pwd
 [ ] renice
 [ ] rm
-[ ] rmdir
+[.] rmdir
 [ ] sed
 [ ] sh
 [ ] sleep

@@ -10,6 +10,7 @@ BINS = \
 	ls \
 	mkdir \
 	pwd \
+	rmdir \
 	sort \
 	tee \
 	true \
