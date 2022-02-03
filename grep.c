@@ -15,7 +15,6 @@ enum {
 int
 match(const char *string, regex_t *re) {
     int status = regexec(re, string, 0, NULL, 0);
-
     if (status != 0)
         return 0;
     return 1;
@@ -106,7 +105,14 @@ main(int argc, char **argv) {
 
     char *regexp = *++argv;
     regex_t re;
-    regcomp(&re, regexp, REGFLAGS);
+    int regerr = regcomp(&re, regexp, REGFLAGS);
+    if (regerr != 0) {
+        char errbuf[100] = {'\0'};
+        regerror(regerr, &re, errbuf, 100);
+        fprintf(stderr, "grep: bad regex: %s\n", errbuf);
+        regfree(&re);
+        return 1;
+    }
 
     if (argc == 1) {
         ret = grep(stdin, &re, flags);
