@@ -9,7 +9,8 @@
 
 enum {
     FLAG_c = 1 << 0,
-    FLAG_v = 1 << 1,
+    FLAG_n = 1 << 1,
+    FLAG_v = 1 << 2,
 };
 
 int
@@ -31,13 +32,16 @@ grep(FILE *f, regex_t *re, int flags) {
     }
 
     int num_matches = 0;
+    int lineno = 0;
     while ((bytes = getline(&buf, &len, f)) != -1) {
+        lineno++;
         int matches = match(buf, re);
         if ((matches && ! (flags & FLAG_v)) || (! matches && (flags & FLAG_v))) {
             num_matches++;
-            if (! (flags & FLAG_c) && write(1, buf, bytes) == -1) {
-                fprintf(stderr, "grep: %s\n", strerror(errno));
-                return 1;
+            if (! (flags & FLAG_c)) {
+                if (flags & FLAG_n)
+                    printf("%d:", lineno);
+                printf("%s", buf);
             }
         }
     }
@@ -58,7 +62,7 @@ grep(FILE *f, regex_t *re, int flags) {
 
 void
 print_usage(void) {
-    fprintf(stderr, "usage: grep [-E|-F] [-icv] regexp [file...]\n");
+    fprintf(stderr, "usage: grep [-E|-F] [-cinv] regexp [file...]\n");
 }
 
 int
@@ -68,7 +72,7 @@ main(int argc, char **argv) {
     int c;
     int REGFLAGS = REG_NOSUB;
     int flags = 0;
-    while ((c = getopt(argc, argv, "EFciv")) != -1) {
+    while ((c = getopt(argc, argv, "EFcinv")) != -1) {
         switch (c) {
             case 'E':
                 REGFLAGS |= REG_EXTENDED;
@@ -81,6 +85,9 @@ main(int argc, char **argv) {
                 break;
             case 'i':
                 REGFLAGS |= REG_ICASE;
+                break;
+            case 'n':
+                flags |= FLAG_n;
                 break;
             case 'v':
                 flags |= FLAG_v;
