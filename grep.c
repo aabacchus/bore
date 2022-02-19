@@ -22,7 +22,7 @@ match(const char *string, regex_t *re) {
 }
 
 int
-grep(FILE *f, regex_t *re, int flags) {
+grep(FILE *f, regex_t *re, int flags, char *fname) {
     size_t len = LINE_MAX;
     ssize_t bytes;
     char *buf = malloc(len);
@@ -39,6 +39,8 @@ grep(FILE *f, regex_t *re, int flags) {
         if ((matches && ! (flags & FLAG_v)) || (! matches && (flags & FLAG_v))) {
             num_matches++;
             if (! (flags & FLAG_c)) {
+                if (fname)
+                    printf("%s:", fname);
                 if (flags & FLAG_n)
                     printf("%d:", lineno);
                 printf("%s", buf);
@@ -46,8 +48,11 @@ grep(FILE *f, regex_t *re, int flags) {
         }
     }
 
-    if (flags & FLAG_c)
+    if (flags & FLAG_c) {
+        if (fname)
+            printf("%s:", fname);
         printf("%d\n", num_matches);
+    }
 
     if (ferror(f)) {
         fprintf(stderr, "grep: %s\n", strerror(errno));
@@ -123,23 +128,29 @@ main(int argc, char **argv) {
     }
 
     if (argc == 1) {
-        ret = grep(stdin, &re, flags);
+        ret = grep(stdin, &re, flags, NULL);
     } else {
         FILE *f;
         while (*++argv) {
-            if (**argv == '-' && *(*argv + 1) == '\0')
+            char *fname = NULL;
+            if (**argv == '-' && *(*argv + 1) == '\0') {
                 f = stdin;
-            else {
+                fname = "stdin";
+            } else {
                 f = fopen(*argv, "r");
                 if (f == NULL) {
                     fprintf(stderr, "grep: %s: %s\n", *argv, strerror(errno));
                     ret = 1;
                     continue;
                 }
+                fname = *argv;
             }
 
+            if (argc == 2)
+                fname = NULL;
+
             /* grep only returns 1 or 0. */
-            ret *= grep(f, &re, flags);
+            ret *= grep(f, &re, flags, fname);
 
             if (f != stdin && fclose(f) == EOF) {
                 fprintf(stderr, "grep: %s: %s\n", *argv, strerror(errno));
