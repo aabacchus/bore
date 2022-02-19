@@ -371,7 +371,7 @@ main(int argc, char **argv) {
     int c, ret_val;
     flags = ret_val = 0;
 
-    while ((c = getopt(argc, argv, "1AFSacfghilmnopqrtu")) != -1) {
+    while ((c = getopt(argc, argv, "1AFSacfgilmnopqrtu")) != -1) {
         switch (c) {
             case '1':
                 flags |= FLAG_1 | FLAG_q;
@@ -400,9 +400,6 @@ main(int argc, char **argv) {
                 flags |= FLAG_g | FLAG_l | FLAG_1;
                 flags &= ~FLAG_m;
                 break;
-            case 'h':
-                printf("usage: %s [-1AFSacfgilmnopqrtu]\n", argv[0]);
-                return 0;
             case 'i':
                 flags |= FLAG_i;
                 break;
@@ -439,6 +436,9 @@ main(int argc, char **argv) {
                 flags |= FLAG_t;
                 flags &= ~FLAG_S;
                 break;
+            case '?':
+                fprintf(stderr, "usage: %s [-1AFSacfgilmnopqrtu]\n", argv[0]);
+                return 1;
         }
     }
     argv += optind - 1;

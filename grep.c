@@ -68,7 +68,7 @@ main(int argc, char **argv) {
     int c;
     int REGFLAGS = REG_NOSUB;
     int flags = 0;
-    while ((c = getopt(argc, argv, "EFchiv")) != -1) {
+    while ((c = getopt(argc, argv, "EFciv")) != -1) {
         switch (c) {
             case 'E':
                 REGFLAGS |= REG_EXTENDED;
@@ -79,9 +79,6 @@ main(int argc, char **argv) {
             case 'c':
                 flags |= FLAG_c;
                 break;
-            case 'h':
-                print_usage();
-                return 0;
             case 'i':
                 REGFLAGS |= REG_ICASE;
                 break;
@@ -102,6 +99,10 @@ main(int argc, char **argv) {
         print_usage();
         return 1;
     }
+
+    /* TODO: allow '--' after pattern_list
+     *       make a list of regex_ts to do for the -e and -f options
+     */
 
     char *regexp = *++argv;
     regex_t re;
