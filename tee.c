@@ -10,6 +10,7 @@
 
 int
 tee(int *fds, int len) {
+    int ret = 0;
     unsigned char buf[BUF_SIZE];
     ssize_t n;
     while ((n = read(0, buf, BUF_SIZE)) > 0) {
@@ -17,19 +18,20 @@ tee(int *fds, int len) {
         for (; i < len; i++) {
             if (write(fds[i], buf, n) == -1) {
                 fprintf(stderr, "tee: write: %s\n", strerror(errno));
-                return 1;
+                ret = 1;
+                continue;
             }
         }
         if (write(1, buf, n) == -1) {
             fprintf(stderr, "tee: write: %s\n", strerror(errno));
-            return 1;
+            ret = 1;
         }
     }
     if (n == -1) {
         fprintf(stderr, "tee: read: %s\n", strerror(errno));
-        return 1;
+        ret = 1;
     }
-    return 0;
+    return ret;
 }
 
 int
