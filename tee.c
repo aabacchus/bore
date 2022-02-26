@@ -57,11 +57,13 @@ main(int argc, char **argv) {
 
     while (*++argv) {
         fds[i] = open(*argv, flags, 0644);
-        if (fds[i++] == -1) {
+        if (fds[i] == -1) {
             fprintf(stderr, "tee: open %s: %s\n", *argv, strerror(errno));
             err = 1;
+            i--;
             continue;
         }
+        i++;
     }
     if (tee(fds, i) != 0) {
         err = 1;
