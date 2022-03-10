@@ -70,7 +70,7 @@
 [ ] more
 [ ] mv
 [ ] newgrp
-[ ] nice
+[x] nice
 [ ] nl
 [ ] nm
 [ ] nohup

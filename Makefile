@@ -9,6 +9,7 @@ BINS = \
 	head \
 	ls \
 	mkdir \
+	nice \
 	pwd \
 	rmdir \
 	sort \

@@ -26,6 +26,7 @@
 [ ] mkdir
 [ ] more
 [ ] mv
+[x] nice [-n]
 [ ] nl
 [ ] printf
 [ ] ps
