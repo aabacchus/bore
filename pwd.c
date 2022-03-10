@@ -60,6 +60,7 @@ flag_P:
         tmp = getcwd(buf, size);
         if (tmp == NULL && errno != ERANGE) {
             perror("pwd");
+            free(buf);
             return 1;
         }
     }
