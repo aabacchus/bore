@@ -15,6 +15,7 @@ BINS = \
 	tee \
 	true \
 	tty \
+	uname \
 	wc \
 
 CC = cc

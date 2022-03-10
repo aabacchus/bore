@@ -110,7 +110,7 @@
 [x] tty
 [ ] ulimit
 [ ] umask
-[ ] uname
+[x] uname
 [ ] uncompress
 [ ] unexpand
 [ ] uniq

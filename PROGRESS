@@ -44,7 +44,7 @@
 [ ] tr
 [x] true
 [x] tty
-[ ] uname
+[x] uname [-amnrsv]
 [ ] uudecode
 [ ] uuencode
 [ ] wc [-lwc]
