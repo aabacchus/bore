@@ -437,7 +437,7 @@ main(int argc, char **argv) {
                 flags &= ~FLAG_u;
                 break;
             case 'f':
-                flags |= FLAG_f;
+                flags |= FLAG_f | FLAG_a;
                 break;
             case 'g':
                 flags |= FLAG_g | FLAG_l | FLAG_1;
