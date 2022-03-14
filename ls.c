@@ -233,15 +233,15 @@ free_all(struct ent *entries, size_t num_entries) {
 }
 
 int
-ls(const char *path) {
+add_entries(const char *path, struct ent **entr, size_t *nentr) {
     struct stat st;
     if (lstat(path, &st) == -1) {
         fprintf(stderr, "ls: %s: %s\n", path, strerror(errno));
         return 1;
     }
 
-    size_t num_entries = 0;
-    struct ent *entries = NULL;
+    size_t num_entries = *nentr;
+    struct ent *entries = *entr;
 
     DIR *dirp = NULL;
     struct dirent *dp = NULL;
@@ -291,6 +291,7 @@ ls(const char *path) {
 
             /* add entry to entries */
             num_entries++;
+            (*nentr)++;
             struct ent *tmp = realloc(entries, num_entries * sizeof(struct ent));
             if (tmp == NULL) {
                 fprintf(stderr, "ls: realloc: %s\n", strerror(errno));
@@ -298,6 +299,7 @@ ls(const char *path) {
                 goto closedir_and_die;
             }
             entries = tmp;
+            *entr = entries;
             entries[num_entries - 1].name  = strdup(dp->d_name);
             entries[num_entries - 1].ino   = stt.st_ino;
             entries[num_entries - 1].mode  = stt.st_mode;
@@ -323,6 +325,7 @@ ls(const char *path) {
     } else {
         /* file */
         num_entries++;
+        (*nentr)++;
         struct ent *tmp = realloc(entries, num_entries * sizeof(struct ent));
         if (tmp == NULL) {
             fprintf(stderr, "ls: realloc: %s\n", strerror(errno));
@@ -330,6 +333,7 @@ ls(const char *path) {
             return 1;
         }
         entries = tmp;
+        *entr = entries;
         entries[num_entries - 1].name  = strdup(path);
         entries[num_entries - 1].ino   = st.st_ino;
         entries[num_entries - 1].mode  = st.st_mode;
@@ -346,13 +350,6 @@ ls(const char *path) {
     }
 
 finished_scan:
-    if (~flags & FLAG_f)
-        qsort(entries, num_entries, sizeof(struct ent), sort);
-    for (size_t i = 0; i < num_entries; i++) {
-        printname(&entries[i]);
-    }
-
-    free_all(entries, num_entries);
     return 0;
 
 closedir_and_die:
@@ -364,6 +361,52 @@ closedir_and_die:
     //free(dp);
 
     return 1;
+}
+
+int
+ls(char **paths, int num) {
+    size_t num_entries = 0;
+    struct ent *entries = NULL;
+
+    /* This puts all the struct ents into one array, which is then sorted.
+     * Solves problem of sorting individual files given as arguments (ls -tr foo.bar foo.baz)
+     * but we should not mix these files with files from other directories (ls foo.bar dir/ )
+     */
+    if (num == 0) {
+        if (add_entries(".", &entries, &num_entries) != 0)
+            return 1;
+    } else {
+        for (int i = 0; i < num; i++) {
+            if (add_entries(paths[i], &entries, &num_entries) != 0)
+                return 1;
+        }
+    }
+
+    if (~flags & FLAG_f)
+        /* is this wrong if num > 1, because argument order dictates order in entries?
+         * but POSIX does say that -f is only about directory entries.
+         * Best to write args separately, and then directories according to -f etc with a dir: prefix.
+         * Like:
+         * $ ls -1f foo.txt bar.txt dir/
+         * .
+         * foo.txt
+         * ..
+         * bar.txt
+         *
+         * dir:
+         * a.txt
+         * .
+         * ..
+         * b.txt
+         *
+        */
+        qsort(entries, num_entries, sizeof(struct ent), sort);
+    for (size_t i = 0; i < num_entries; i++) {
+        printname(&entries[i]);
+    }
+
+    free_all(entries, num_entries);
+    return 0;
 }
 
 int
@@ -441,19 +484,14 @@ main(int argc, char **argv) {
                 return 1;
         }
     }
-    argv += optind - 1;
+    argv += optind;
+    argc -= optind;
 
     if(!isatty(1))
         flags |= FLAG_1;
 
-    if (argc == optind) {
-        if (ls(".") != 0)
-            ret_val = 1;
-    }
-    // TODO: if multiple separate files are given, they are not sorted (eg ls -lSr *.c)
-    else while (*++argv)
-        if (ls(*argv) != 0)
-            ret_val = 1;
+    if (ls(argv, argc) != 0)
+        ret_val = 1;
 
     if (!(flags & FLAG_1))
         puts(""); /* final newline */
