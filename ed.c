@@ -148,12 +148,8 @@ write_buf(char *path) {
 int
 input(int lineno) {
     ssize_t n;
-    char *tmp = malloc(LINE_MAX);
-    if (tmp == NULL) {
-        fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
-        return -1;
-    }
-    size_t len = LINE_MAX;
+    char *tmp = NULL;
+    size_t len = 0;
     while (1) {
         n = getline(&tmp, &len, stdin);
         /* getline returns bytes + 1 for \n delimiter */
@@ -183,7 +179,9 @@ delete_line(int lineno) {
         return 1;
     l->prev->next = l->next;
     l->next->prev = l->prev;
+    free(l->s);
     free(l);
+    num_lines--;
     return 0;
 }
 
@@ -201,12 +199,8 @@ ed(char *startfile) {
                 return 1;
             }
         }
-        char *c = malloc(LINE_MAX);
-        if (c == NULL) {
-            fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
-            return 1;
-        }
-        size_t c_len = LINE_MAX;
+        char *c = NULL;
+        size_t c_len = 0;
         if (getline(&c, &c_len, stdin) == -1) {
             fprintf(stderr, "ed: getline: %s\n", strerror(errno));
             return 1;
@@ -281,11 +275,14 @@ ed(char *startfile) {
                     printf("? writing to a new filename not yet implemented\n");
                 break;
             case 'q':
-                if (changed == 0)
+                if (changed == 0) {
+                    free(c_initial);
                     return 0;
+                }
                 printf("?\n");
                 break;
             case 'Q':
+                free(c_initial);
                 return 0;
             case '\n':
                 break;
@@ -341,11 +338,13 @@ main(int argc, char **argv) {
         startfile = *argv;
 
     ret = ed(startfile);
-    struct line *x = first;
-    while (x != first) {
+
+    struct line *x = first->next;
+    do {
         x = x->next;
-        free(x);
-    }
-    free(first);
+        free(x->prev->s);
+        free(x->prev);
+    } while (x != first);
+
     return ret;
 }
