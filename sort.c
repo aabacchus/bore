@@ -21,6 +21,14 @@ alphacompare(const void *s1, const void *s2) {
     return ret;
 }
 
+void
+free_lines(char **lines, int n) {
+    for (int i = 0; i < n; i++)
+        free(lines[i]);
+    free(lines);
+}
+
+
 int
 sort(FILE *f) {
     char **lines = malloc(sizeof(char *));
@@ -31,19 +39,16 @@ sort(FILE *f) {
     size_t lsize = sizeof(char *);
     size_t lused = 0;
     int i = 0;
-    char *buf = malloc(LINE_MAX);
-    if (buf == NULL) {
-        fprintf(stderr, "sort: %s\n", strerror(errno));
-        free(lines);
-        return 1;
-    }
+    char *buf = NULL;
     ssize_t bufused = 0;
-    size_t bufsize = LINE_MAX;
+    size_t bufsize = 0;
     while ((bufused = getline(&buf, &bufsize, f)) != -1) {
         if (bufused + lused > lsize) {
             char **tmp = realloc(lines, bufused + lused);
             if (tmp == NULL) {
                 fprintf(stderr, "sort: %s\n", strerror(errno));
+                free_lines(lines, i);
+                free(buf);
                 return 1;
             }
             lused += bufused;
@@ -57,7 +62,7 @@ sort(FILE *f) {
     }
     if (ferror(f)) {
         fprintf(stderr, "sort: %s\n", strerror(errno));
-        free(lines);
+        free_lines(lines, i);
         free(buf);
         return 1;
     }
@@ -68,7 +73,7 @@ sort(FILE *f) {
         printf("%s", lines[j]);
     }
 
-    free(lines);
+    free_lines(lines, i);
     free(buf);
     return 0;
 }
