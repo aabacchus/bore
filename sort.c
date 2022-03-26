@@ -1,6 +1,7 @@
 #define _XOPEN_SOURCE 700
 #include <errno.h>
 #include <limits.h>
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +15,7 @@ int flags;
 
 int
 alphacompare(const void *s1, const void *s2) {
-    int ret = strcmp(*(const char **) s1, *(const char **) s2);
+    int ret = strcoll(*(const char **) s1, *(const char **) s2);
     if (flags & FLAG_r)
         ret *= -1;
     return ret;
@@ -74,6 +75,7 @@ sort(FILE *f) {
 
 int
 main(int argc, char **argv) {
+    setlocale(LC_ALL, "");
     int c;
     int ret = 0;
     flags = 0;

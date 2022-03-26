@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <locale.h>
 #include <pwd.h>
 #include <grp.h>
 #include <stdio.h>
@@ -215,8 +216,12 @@ sort(const void *s1, const void *s2) {
         ret = e2->size - e1->size;
     if (flags & FLAG_t)
         ret = e2->tim.tv_sec - e1->tim.tv_sec;
-    if (ret == 0)
-        ret = strcmp(e1->name, e2->name);
+    if (ret == 0) {
+        errno = 0;
+        ret = strcoll(e1->name, e2->name);
+        if (errno != 0)
+            ret = strcmp(e1->name, e2->name);
+    }
     if (flags & FLAG_r)
         ret *= -1;
     return ret;
@@ -413,6 +418,7 @@ int
 main(int argc, char **argv) {
     int c, ret_val;
     flags = ret_val = 0;
+    setlocale(LC_ALL, "");
 
     while ((c = getopt(argc, argv, "1AFSacfgilmnopqrtu")) != -1) {
         switch (c) {
