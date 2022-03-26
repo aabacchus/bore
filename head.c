@@ -9,13 +9,9 @@
 int
 head(FILE *f, int n) {
     int i;
-    size_t len = LINE_MAX;
     ssize_t bytes;
-    char *buf = malloc(len);
-    if (buf == NULL) {
-        fprintf(stderr, "head: %s\n", strerror(errno));
-        return 1;
-    }
+    char *buf = NULL;
+    size_t len = 0;
     for (i = 0; i < n; i++) {
         bytes = getline(&buf, &len, f);
         if (bytes == -1) {
@@ -31,6 +27,7 @@ head(FILE *f, int n) {
             return 1;
         }
     }
+    free(buf);
 
     return 0;
 }
