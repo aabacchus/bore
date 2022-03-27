@@ -135,7 +135,7 @@ main(int argc, char **argv) {
             char *fname = NULL;
             if (**argv == '-' && *(*argv + 1) == '\0') {
                 f = stdin;
-                fname = "stdin";
+                fname = "standardinput";
             } else {
                 f = fopen(*argv, "r");
                 if (f == NULL) {
