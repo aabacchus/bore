@@ -17,7 +17,7 @@
 [ ] ed [-ps] p i a q Q
 [x] false
 [ ] find
-[ ] grep [-cinv]
+[ ] grep [-cilnv]
 [x] head [-n]
 [ ] id
 [ ] kill
@@ -33,7 +33,6 @@
 [x] pwd [-LP]
 [ ] rm
 [ ] rmdir
-[ ] shred
 [ ] sleep
 [ ] sort [-r]
 [ ] split

@@ -9,8 +9,9 @@
 
 enum {
     FLAG_c = 1 << 0,
-    FLAG_n = 1 << 1,
-    FLAG_v = 1 << 2,
+    FLAG_l = 1 << 1,
+    FLAG_n = 1 << 2,
+    FLAG_v = 1 << 3,
 };
 
 int
@@ -38,7 +39,7 @@ grep(FILE *f, regex_t *re, int flags, char *fname) {
         int matches = match(buf, re);
         if ((matches && ! (flags & FLAG_v)) || (! matches && (flags & FLAG_v))) {
             num_matches++;
-            if (! (flags & FLAG_c)) {
+            if (! (flags & FLAG_c) && ! (flags & FLAG_l)) {
                 if (fname)
                     printf("%s:", fname);
                 if (flags & FLAG_n)
@@ -48,7 +49,9 @@ grep(FILE *f, regex_t *re, int flags, char *fname) {
         }
     }
 
-    if (flags & FLAG_c) {
+    if (flags & FLAG_l) {
+        printf("%s\n", fname);
+    } else if (flags & FLAG_c) {
         if (fname)
             printf("%s:", fname);
         printf("%d\n", num_matches);
@@ -67,7 +70,7 @@ grep(FILE *f, regex_t *re, int flags, char *fname) {
 
 void
 print_usage(void) {
-    fprintf(stderr, "usage: grep [-E|-F] [-cinv] regexp [file...]\n");
+    fprintf(stderr, "usage: grep [-E|-F] [-cilnv] regexp [file...]\n");
 }
 
 int
@@ -77,7 +80,7 @@ main(int argc, char **argv) {
     int c;
     int REGFLAGS = REG_NOSUB;
     int flags = 0;
-    while ((c = getopt(argc, argv, "EFcinv")) != -1) {
+    while ((c = getopt(argc, argv, "EFcilnv")) != -1) {
         switch (c) {
             case 'E':
                 REGFLAGS |= REG_EXTENDED;
@@ -87,9 +90,14 @@ main(int argc, char **argv) {
                 break;
             case 'c':
                 flags |= FLAG_c;
+                flags &= ~FLAG_l;
                 break;
             case 'i':
                 REGFLAGS |= REG_ICASE;
+                break;
+            case 'l':
+                flags |= FLAG_l;
+                flags &= ~FLAG_c;
                 break;
             case 'n':
                 flags |= FLAG_n;
@@ -128,14 +136,14 @@ main(int argc, char **argv) {
     }
 
     if (argc == 1) {
-        ret = grep(stdin, &re, flags, NULL);
+        ret = grep(stdin, &re, flags, "(standardinput)");
     } else {
         FILE *f;
         while (*++argv) {
             char *fname = NULL;
             if (**argv == '-' && *(*argv + 1) == '\0') {
                 f = stdin;
-                fname = "standardinput";
+                fname = "(standardinput)";
             } else {
                 f = fopen(*argv, "r");
                 if (f == NULL) {
