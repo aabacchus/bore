@@ -156,6 +156,8 @@ input(int lineno) {
         if (n == 0)
             break;
         if (n < 0) {
+            if (feof(stdin))
+                break;
             fprintf(stderr, "ed: getline: %s\n", strerror(errno));
             goto input_fail;
         }
@@ -188,10 +190,15 @@ delete_line(int lineno) {
 int
 ed(char *startfile) {
     int changed = 0;
+    char *cbuf = NULL;
+    size_t c_len = 0;
+
     if (startfile)
         if (read_buf(startfile) != 0)
             return 1;
+
     while (1) {
+        char *c;
         if (prompt) {
             printf("%c ", prompt);
             if (fflush(stdout) == EOF) {
@@ -199,13 +206,10 @@ ed(char *startfile) {
                 return 1;
             }
         }
-        char *c = NULL;
-        size_t c_len = 0;
-        if (getline(&c, &c_len, stdin) == -1) {
-            fprintf(stderr, "ed: getline: %s\n", strerror(errno));
-            return 1;
+        if (getline(&cbuf, &c_len, stdin) == -1) {
+            break;
         }
-        char *c_initial = c;
+        c = cbuf;
         if (isdigit(*c)) {
             char new_c = *c - '0';
             if (0 < new_c && new_c <= num_lines)
@@ -276,13 +280,13 @@ ed(char *startfile) {
                 break;
             case 'q':
                 if (changed == 0) {
-                    free(c_initial);
+                    free(cbuf);
                     return 0;
                 }
                 printf("?\n");
                 break;
             case 'Q':
-                free(c_initial);
+                free(cbuf);
                 return 0;
             case '\n':
                 break;
@@ -290,7 +294,12 @@ ed(char *startfile) {
                 printf("?\n");
                 break;
         }
-        free(c_initial);
+    }
+
+    free(cbuf);
+    if (ferror(stdin)) {
+        fprintf(stderr, "ed: getline: %s\n", strerror(errno));
+        return 1;
     }
     return 0;
 }
