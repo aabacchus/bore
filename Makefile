@@ -25,13 +25,10 @@ XLDFLAGS = $(LDFLAGS)
 
 .PHONY: clean
 
-all: bin $(BINS:%=bin/%)
+all: $(BINS)
 
-bin:
-	mkdir -p bin
-
-$(BINS:%=bin/%): $(BINS:=.c)
-	$(CC) $(XCFLAGS) $(XLDFLAGS) -o $@ $(@:bin/%=%.c)
+.c:
+	$(CC) $(XCFLAGS) $(XLDFLAGS) -o $@ $<
 
 clean:
-	rm -fr bin
+	rm -f $(BINS)
