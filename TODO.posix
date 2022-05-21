@@ -85,7 +85,7 @@
 [ ] ps
 [x] pwd
 [ ] renice
-[ ] rm
+[.] rm
 [.] rmdir
 [ ] sed
 [ ] sh

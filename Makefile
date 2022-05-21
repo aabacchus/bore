@@ -11,6 +11,7 @@ BINS = \
 	mkdir \
 	nice \
 	pwd \
+	rm \
 	rmdir \
 	sort \
 	tee \
@@ -20,7 +21,7 @@ BINS = \
 	wc \
 
 CC = cc
-XCFLAGS = $(CFLAGS) -Wall -Wextra -Wpedantic -g
+XCFLAGS = $(CFLAGS) -Wall -Wextra -std=c99 -pedantic -g -Og
 XLDFLAGS = $(LDFLAGS)
 
 .PHONY: clean

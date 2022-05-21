@@ -8,6 +8,7 @@ ls
 mkdir
 nice
 pwd
+rm
 rmdir
 sort
 tee
