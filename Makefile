@@ -24,8 +24,6 @@ CC = cc
 XCFLAGS = $(CFLAGS) -Wall -Wextra -std=c99 -pedantic -g -Og
 XLDFLAGS = $(LDFLAGS)
 
-.PHONY: clean
-
 all: $(BINS)
 
 .c:
