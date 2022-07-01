@@ -171,9 +171,17 @@ printname(struct ent *e) {
             fprintf(stderr, "ls: %s: %s\n", e->name, strerror(errno));
             return 1;
         }
-        char buf[sizeof "MMM DD HH:MM"];
-        strftime(buf, sizeof(buf), "%b %e %H:%M", tm);
-        printf("%s ", buf);
+        time_t time_now = time(NULL);
+        time_t six_months = time_now - 6*30*24*3600;
+        if (e->tim.tv_sec < six_months || e->tim.tv_sec > time_now) {
+            char buf[sizeof "MMM DD  YYYY"];
+            strftime(buf, sizeof(buf), "%b %e  %Y", tm);
+            printf("%s ", buf);
+        } else {
+            char buf[sizeof "MMM DD HH:MM"];
+            strftime(buf, sizeof(buf), "%b %e %H:%M", tm);
+            printf("%s ", buf);
+        }
     }
 
     qprint(e->name, flags & FLAG_q);
