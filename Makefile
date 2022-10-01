@@ -13,6 +13,7 @@ BINS = \
 	pwd \
 	rm \
 	rmdir \
+	sleep \
 	sort \
 	tee \
 	true \

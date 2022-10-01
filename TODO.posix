@@ -89,7 +89,7 @@
 [.] rmdir
 [ ] sed
 [ ] sh
-[ ] sleep
+[x] sleep
 [.] sort
 [ ] split
 [ ] strings

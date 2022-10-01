@@ -33,7 +33,7 @@
 [x] pwd [-LP]
 [ ] rm
 [ ] rmdir
-[ ] sleep
+[x] sleep
 [ ] sort [-r]
 [ ] split
 [ ] strings
