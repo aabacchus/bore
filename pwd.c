@@ -50,11 +50,13 @@ flag_P:
 
     char *buf = NULL;
     for (char *tmp = NULL; tmp == NULL; size += 32) {
-        buf = realloc(buf, size);
-        if (buf == NULL) {
+        char *b = realloc(buf, size);
+        if (b == NULL) {
+            free(buf);
             perror("pwd");
             return 1;
         }
+        buf = b;
 
         errno = 0;
         tmp = getcwd(buf, size);
