@@ -2,6 +2,7 @@ cat
 echo
 ed
 false
+find
 grep
 head
 ls
