@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <limits.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,7 +22,7 @@ main(int argc, char **argv) {
 
     errno = 0;
     unsigned long t = strtoul(argv[1], NULL, 10);
-    if (errno || (signed long)t < 0)
+    if (errno || t == ULONG_MAX)
         return 1;
     while (t > 0)
         t = sleep(t);
