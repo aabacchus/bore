@@ -11,6 +11,10 @@
 int s_flag;
 char prompt;
 
+struct range {
+    int a, b;
+};
+
 struct line {
     int len;
     struct line *prev, *next;
@@ -187,6 +191,42 @@ delete_line(int lineno) {
     return 0;
 }
 
+struct range *
+parse_line_range(char **c) {
+    while (isspace(**c))
+        (*c)++;
+    switch (**c) {
+        case ',':
+        case ';':
+        case '$':
+        case '+':
+        case '-':
+        case '.':
+        /* case '\'': TODO */
+            break;
+        default:
+            if (!isdigit(**c))
+                return NULL;
+    }
+    struct range *r = malloc(sizeof(struct range));
+    if (r == NULL) {
+        fprintf(stderr, "ed: malloc: %s\n", strerror(errno));
+        return NULL;
+    }
+    if (isdigit(**c)) {
+        char new_c = **c - '0';
+        if (0 < new_c && new_c <= num_lines)
+            cur_line = new_c;
+        else {
+            printf("?\n");
+            free(r);
+            return NULL;
+        }
+        (*c)++;
+    }
+    return r;
+}
+
 int
 ed(char *startfile) {
     int changed = 0;
@@ -206,20 +246,13 @@ ed(char *startfile) {
                 return 1;
             }
         }
+        /* read input */
         if (getline(&cbuf, &c_len, stdin) == -1) {
             break;
         }
         c = cbuf;
-        if (isdigit(*c)) {
-            char new_c = *c - '0';
-            if (0 < new_c && new_c <= num_lines)
-                cur_line = new_c;
-            else {
-                printf("?\n");
-                continue;
-            }
-            c++;
-        }
+        /* parse_line_range will increment c if necessary */
+        struct range *r = parse_line_range(&c);
         switch (*c) {
             case '=':
                 printf("%d\n", cur_line);
@@ -294,6 +327,7 @@ ed(char *startfile) {
                 printf("?\n");
                 break;
         }
+        free(r);
     }
 
     free(cbuf);
