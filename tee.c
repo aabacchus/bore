@@ -40,7 +40,7 @@ main(int argc, char **argv) {
     int flags = O_WRONLY | O_CREAT;
 
     int c;
-    while ((c = getopt(argc, argv, "ai")) != EOF) {
+    while ((c = getopt(argc, argv, "ai")) != -1) {
         switch (c) {
             case 'a':
                 flags |= O_APPEND;
