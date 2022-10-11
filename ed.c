@@ -326,7 +326,7 @@ main(int argc, char **argv) {
     first->prev = first;
     first->s = NULL;
     first->len = 0;
-    while ((c = getopt(argc, argv, "p:s")) != EOF) {
+    while ((c = getopt(argc, argv, "p:s")) != -1) {
         switch (c) {
             case 's':
                 s_flag = 1;
