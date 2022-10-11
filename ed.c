@@ -315,6 +315,10 @@ ed(char **startfile) {
                  * So there is one space between 'w' and the filename. */
                 c += 2;
                 if (c-cbuf >= c_used) {
+                    if (*startfile == NULL) {
+                        printf("?\n");
+                        continue;
+                    }
                     if (write_buf(*startfile) != 0)
                         continue;
                     changed = 0;
