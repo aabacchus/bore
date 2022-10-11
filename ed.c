@@ -330,12 +330,14 @@ ed(char **startfile) {
             case 'q':
                 if (changed == 0) {
                     free(cbuf);
+                    free(r);
                     return 0;
                 }
                 printf("?\n");
                 break;
             case 'Q':
                 free(cbuf);
+                free(r);
                 return 0;
             case '\n':
                 break;
