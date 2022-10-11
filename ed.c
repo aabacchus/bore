@@ -123,18 +123,20 @@ read_buf(char *path) {
 
 int
 write_buf(char *path) {
-    int fd;
+    FILE *fd;
     ssize_t n, total = 0;
 
-    /* TODO: if path[0] == '!', use popen */
-    fd = open(path, O_WRONLY | O_CREAT, 0644);
-    if (fd == -1) {
+    if (path[0] == '!')
+        fd = popen(path + 1, "w");
+    else
+        fd = fopen(path, "w");
+    if (fd == NULL) {
         fprintf(stderr, "ed: open %s: %s\n", path, strerror(errno));
         return 1;
     }
     struct line *l = first->next;
     for (; l != first; l = l->next) {
-        n = write(fd, l->s, l->len);
+        n = fwrite(l->s, 1, l->len, fd);
         if (n == -1) {
             fprintf(stderr, "ed: write %s: %s\n", path, strerror(errno));
             return 1;
@@ -142,7 +144,11 @@ write_buf(char *path) {
         total += n;
     }
     print_byte_counts(total);
-    if (close(fd) == -1) {
+    if (path[0] == '!')
+        n = pclose(fd);
+    else
+        n = fclose(fd);
+    if (n == -1) {
         fprintf(stderr, "ed: close %s: %s\n", path, strerror(errno));
         return 1;
     }
@@ -326,9 +332,12 @@ ed(char **startfile) {
                     if (write_buf(c) != 0)
                         continue;
                     changed = 0;
-                    if (*startfile)
-                        free(*startfile);
-                    *startfile = strdup(c);
+                    if (c[0] != '!') {
+                        /* only remember filenames, not commands */
+                        if (*startfile)
+                            free(*startfile);
+                        *startfile = strdup(c);
+                    }
                 }
                 break;
             case 'q':
