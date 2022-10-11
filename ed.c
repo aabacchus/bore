@@ -126,7 +126,8 @@ write_buf(char *path) {
     int fd;
     ssize_t n, total = 0;
 
-    fd = open(path, O_WRONLY);
+    /* TODO: if path[0] == '!', use popen */
+    fd = open(path, O_WRONLY | O_CREAT, 0644);
     if (fd == -1) {
         fprintf(stderr, "ed: open %s: %s\n", path, strerror(errno));
         return 1;
@@ -228,13 +229,14 @@ parse_line_range(char **c) {
 }
 
 int
-ed(char *startfile) {
+ed(char **startfile) {
     int changed = 0;
     char *cbuf = NULL;
     size_t c_len = 0;
+    ssize_t c_used;
 
-    if (startfile)
-        if (read_buf(startfile) != 0)
+    if (*startfile)
+        if (read_buf(*startfile) != 0)
             return 1;
 
     /* main loop */
@@ -249,10 +251,12 @@ ed(char *startfile) {
             }
         }
         /* read input */
-        if (getline(&cbuf, &c_len, stdin) == -1) {
+        c_used = getline(&cbuf, &c_len, stdin);
+        if (c_used == -1)
             break;
-        }
         c = cbuf;
+        if (c[c_used - 1] == '\n')
+            c[--c_used] = '\0';
         /* parse_line_range will increment c if necessary */
         struct range *r = parse_line_range(&c);
         switch (*c) {
@@ -306,12 +310,22 @@ ed(char *startfile) {
                 }
                 break;
             case 'w':
-                if (startfile) {
-                    if (write_buf(startfile) != 0)
+                /* POSIX says the syntax is:
+                 * (1,$)w [file]
+                 * So there is one space between 'w' and the filename. */
+                c += 2;
+                if (c-cbuf >= c_used) {
+                    if (write_buf(*startfile) != 0)
                         continue;
                     changed = 0;
-                } else
-                    printf("? writing to a new filename not yet implemented\n");
+                } else {
+                    if (write_buf(c) != 0)
+                        continue;
+                    changed = 0;
+                    if (*startfile)
+                        free(*startfile);
+                    *startfile = strdup(c);
+                }
                 break;
             case 'q':
                 if (changed == 0) {
@@ -382,9 +396,9 @@ main(int argc, char **argv) {
 
     char *startfile = NULL;
     if (*argv)
-        startfile = *argv;
+        startfile = strdup(*argv);
 
-    ret = ed(startfile);
+    ret = ed(&startfile);
 
     struct line *x = first->next;
     do {
@@ -393,5 +407,6 @@ main(int argc, char **argv) {
         free(x->prev);
     } while (x != first);
 
+    free(startfile);
     return ret;
 }
