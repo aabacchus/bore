@@ -23,7 +23,7 @@ struct line {
 
 struct line *first;
 int num_lines = 0;
-int cur_line = 1;
+int cur_line = 1; // TODO: should start at 0
 
 void
 print_byte_counts(size_t n) {
@@ -117,7 +117,7 @@ read_buf(char *path) {
         return 1;
     }
     print_byte_counts(bytes);
-    cur_line = 1;
+    cur_line = 1; // TODO: POSIX wants cur_line to be the last line in the buf
     return 0;
 }
 
@@ -237,8 +237,10 @@ ed(char *startfile) {
         if (read_buf(startfile) != 0)
             return 1;
 
+    /* main loop */
     while (1) {
         char *c;
+        /* print prompt */
         if (prompt) {
             printf("%c ", prompt);
             if (fflush(stdout) == EOF) {
