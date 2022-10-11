@@ -53,7 +53,7 @@ wc(struct count *ct, FILE *f) {
         if (c == '\n')
             ++ct->l;
         if (isspace(c))
-            in_word=0;
+            in_word = 0;
         else if (in_word == 0) {
             in_word = 1;
             ++ct->w;
