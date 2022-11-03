@@ -2,6 +2,7 @@
 # Any additional commands come afterwards.
 # An [x] in the box indicates an essentially completed program.
 
+[x] basename
 [x] cat [-u]
 [ ] chmod
 [ ] chown

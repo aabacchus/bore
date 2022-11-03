@@ -2,7 +2,7 @@
 [ ] ar
 [ ] asa
 [ ] awk
-[ ] basename
+[x] basename
 [ ] bc
 [ ] c99
 [ ] cal

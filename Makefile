@@ -1,6 +1,7 @@
 .POSIX:
 
 BINS = \
+	basename \
 	cat \
 	echo \
 	ed \
